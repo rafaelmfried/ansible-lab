@@ -1,0 +1,51 @@
+# Ansible Vault passwords
+.vault_pass*
+*.vault_pass
+vault_password*
+
+# Vault files with sensitive data
+group_vars/*/vault.yml
+host_vars/*/vault.yml
+*.vault
+*.secret
+
+# SSH private keys
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+ansible.log
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.env
+
+# Docker
+.dockerignore
+
+# Backup files
+*.backup
+*.bak
+*.old

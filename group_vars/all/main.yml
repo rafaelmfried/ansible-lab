@@ -1,0 +1,42 @@
+# Variáveis públicas do lab
+# Este arquivo contém variáveis não sensíveis
+
+# Configurações básicas do Lab
+lab_name: "ansible-lab"
+lab_version: "1.0"
+lab_description: "Ambiente Docker para aprendizado de Ansible"
+
+# Configurações de containers
+control_node_ip: "198.18.100.10"
+web_servers:
+  - name: "web-server-1"
+    ip: "198.18.100.20"
+    port: 2220
+  - name: "web-server-2"
+    ip: "198.18.100.21"
+    port: 2221
+
+database_servers:
+  - name: "db-server-1"
+    ip: "198.18.100.30"
+    port: 2230
+
+app_servers:
+  - name: "app-server-1"
+    ip: "198.18.100.40"
+    port: 2240
+
+vm_hosts:
+  - name: "vm-host"
+    ip: "198.18.100.50"
+    port: 2250
+    vnc_ports: "5920-5930"
+
+# Configurações de serviços
+nginx_port: 80
+nginx_max_clients: 200
+
+# Configurações do Debian
+debian_version: "13"
+debian_codename: "trixie"
+python_version: "3.13"

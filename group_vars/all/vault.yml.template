@@ -1,0 +1,16 @@
+# Template do arquivo vault.yml
+# Copie este arquivo para vault.yml e edite com suas informações
+# Execute: ansible-vault encrypt group_vars/all/vault.yml --vault-password-file=<(echo "sua-senha")
+
+$ANSIBLE_VAULT;1.1;AES256
+# Este é um template. Substitua pelos seus dados:
+
+# vault_ssh_public_key: "sua-chave-ssh-publica"
+# vault_mysql_password: "sua-senha-mysql"
+# vault_app_secret: "seu-app-secret"
+# vault_api_token: "seu-api-token"
+
+# Para criar um novo arquivo vault:
+# 1. cp vault.yml.template vault.yml
+# 2. edite o arquivo com suas informações
+# 3. ansible-vault encrypt vault.yml --vault-password-file=<(echo "sua-senha")
