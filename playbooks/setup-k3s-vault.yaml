@@ -32,6 +32,7 @@
         mode: "0644"
         content: |
           snapshotter: "{{ k3s_snapshotter }}"
+      register: k3s_config
       tags: k3s
 
     - name: Atualizar cache do apt
@@ -74,6 +75,7 @@
         INSTALL_K3S_SKIP_ENABLE=true \
         INSTALL_K3S_SKIP_START=true \
         INSTALL_K3S_EXEC="server --cluster-init --snapshotter {{ k3s_snapshotter }}" \
+        K3S_CONFIG_FILE="/etc/rancher/k3s/config.yaml" \
         K3S_TOKEN="{{ k3s_token }}" \
         K3S_NODE_NAME="{{ k3s_node_name }}" \
         sh -s -
@@ -83,19 +85,33 @@
       when: not systemd_present.stat.exists
       tags: k3s
 
+    - name: Parar K3s se estiver rodando (sem systemd)
+      become: true
+      shell: |
+        if [ -x /usr/local/bin/k3s-killall.sh ]; then
+          /usr/local/bin/k3s-killall.sh || true
+        fi
+        pkill -f "/usr/local/bin/k3s server" || true
+        rm -f /var/run/k3s.pid
+      changed_when: false
+      failed_when: false
+      when: not systemd_present.stat.exists
+      tags: k3s
+
     - name: Iniciar K3s em background (sem systemd)
       become: true
       shell: |
         if [ -f /var/run/k3s.pid ] && kill -0 "$(cat /var/run/k3s.pid)" 2>/dev/null; then
           exit 0
         fi
-        nohup /usr/local/bin/k3s server --cluster-init --snapshotter {{ k3s_snapshotter }} > /var/log/k3s.log 2>&1 &
+        nohup /usr/local/bin/k3s server --cluster-init --snapshotter {{ k3s_snapshotter }} --config /etc/rancher/k3s/config.yaml > /var/log/k3s.log 2>&1 &
         echo $! > /var/run/k3s.pid
       args:
         executable: /bin/bash
       environment:
         K3S_TOKEN: "{{ k3s_token }}"
         K3S_NODE_NAME: "{{ k3s_node_name }}"
+        K3S_CONFIG_FILE: /etc/rancher/k3s/config.yaml
       when: not systemd_present.stat.exists
       tags: k3s
 
@@ -113,6 +129,18 @@
       wait_for:
         path: /etc/rancher/k3s/k3s.yaml
         timeout: 300
+      tags: k3s
+
+    - name: Aguardar API do K3s responder
+      become: true
+      shell: |
+        curl -sk https://127.0.0.1:6443/healthz
+      register: k3s_health
+      changed_when: false
+      retries: 12
+      delay: 10
+      until: k3s_health.rc == 0 and (k3s_health.stdout | lower | trim) == "ok"
+      failed_when: false
       tags: k3s
 
     - name: Verificar status do serviço K3s
@@ -156,6 +184,18 @@
         KUBECONFIG=/etc/rancher/k3s/k3s.yaml /usr/local/bin/kubectl get nodes
       register: cluster_nodes
       changed_when: false
+      retries: 6
+      delay: 10
+      until: cluster_nodes.rc == 0
+      failed_when: false
+      tags: k3s
+
+    - name: Verificar se token do cluster existe
+      become: true
+      stat:
+        path: /var/lib/rancher/k3s/server/node-token
+      register: k3s_token_file
+      changed_when: false
       tags: k3s
 
     - name: Obter token do cluster para novos nodes
@@ -164,6 +204,14 @@
         cat /var/lib/rancher/k3s/server/node-token
       register: cluster_token
       changed_when: false
+      when: k3s_token_file.stat.exists
+      failed_when: false
+      tags: k3s
+
+    - name: Definir saida do cluster para exibicao
+      set_fact:
+        cluster_nodes_display: "{{ cluster_nodes.stdout if cluster_nodes.rc == 0 else 'API do K3s ainda nao respondeu' }}"
+        cluster_token_display: "{{ cluster_token.stdout if (cluster_token is defined and cluster_token.rc == 0) else 'Token ainda indisponivel' }}"
       tags: k3s
 
     - name: Exibir informações do cluster testcluster
@@ -173,8 +221,8 @@
           Cluster "{{ cluster_name }}" configurado na {{ inventory_hostname }}
           Status do serviço: {{ k3s_status_display }}
           Nodes do cluster:
-          {{ cluster_nodes.stdout }}
-          Token para novos nodes: {{ cluster_token.stdout }}
+          {{ cluster_nodes_display }}
+          Token para novos nodes: {{ cluster_token_display }}
       tags: k3s
 
     - name: Criar diretório .kube para usuário ansible
