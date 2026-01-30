@@ -1,0 +1,83 @@
+FROM debian:13
+
+# Metadados
+LABEL maintainer="Rafael Friederick <rafaelmfried@users.noreply.github.com>" \
+      description="Ansible Control Node - Debian 13" \
+      version="1.0" \
+      github="https://github.com/rafaelmfried"
+
+# Variáveis de ambiente
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=C.UTF-8 \
+    LANGUAGE=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    PYTHONUNBUFFERED=1
+
+# Atualizar repositórios e instalar dependências do sistema
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        python3 \
+        python3-pip \
+        python3-venv \
+        python3-dev \
+        openssh-client \
+        sshpass \
+        git \
+        curl \
+        wget \
+        vim \
+        nano \
+        jq \
+        tree \
+        ca-certificates \
+        gnupg \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /tmp/* \
+    && rm -rf /var/tmp/*
+
+# Instalar Ansible e ferramentas relacionadas via pip
+RUN python3 -m pip install --no-cache-dir --break-system-packages \
+        ansible \
+        ansible-core \
+        ansible-lint \
+        yamllint \
+        jmespath \
+        netaddr \
+        requests
+
+# Criar usuário ansible (não-root por segurança)
+RUN groupadd -r ansible && \
+    useradd -r -g ansible -m -d /home/ansible -s /bin/bash ansible && \
+    echo 'ansible:ansible' | chpasswd
+
+# Configurar diretório de trabalho
+WORKDIR /home/ansible
+
+# Configurar SSH para o usuário ansible
+RUN mkdir -p /home/ansible/.ssh && \
+    ssh-keygen -t ed25519 -f /home/ansible/.ssh/id_ed25519 -N "" && \
+    ssh-keygen -t rsa -b 4096 -f /home/ansible/.ssh/id_rsa -N "" && \
+    chmod 700 /home/ansible/.ssh && \
+    chmod 600 /home/ansible/.ssh/id_* && \
+    chmod 644 /home/ansible/.ssh/*.pub && \
+    chown -R ansible:ansible /home/ansible/.ssh
+
+# SSH keys serão configuradas via Ansible Vault durante o provisionamento
+
+# Configurar arquivo de configuração SSH
+RUN echo "Host *" > /home/ansible/.ssh/config && \
+    echo "    StrictHostKeyChecking no" >> /home/ansible/.ssh/config && \
+    echo "    UserKnownHostsFile /dev/null" >> /home/ansible/.ssh/config && \
+    echo "    LogLevel QUIET" >> /home/ansible/.ssh/config && \
+    chmod 600 /home/ansible/.ssh/config && \
+    chown ansible:ansible /home/ansible/.ssh/config
+
+# Mudar para usuário ansible
+USER ansible
+
+# Criar estrutura de diretórios do Ansible
+RUN mkdir home/ansible/{playbooks,roles,inventory,group_vars,host_vars,collections,plugins}
+
+# Comando padrão
+CMD ["/bin/bash"]
