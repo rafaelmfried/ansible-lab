@@ -1,0 +1,120 @@
+---
+# Playbook para configurar K3s na VM3 com cluster "testcluster"
+- name: Configurar K3s cluster "testcluster" na VM3
+  hosts: vm3
+  become: yes
+  vars_files:
+    - ../group_vars/all/vault.yml
+  vars:
+    cluster_name: "testcluster"
+    k3s_node_name: "{{ cluster_name }}-master"
+
+  tasks:
+    - name: Atualizar cache do apt
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      tags: k3s
+
+    - name: Instalar dependências para K3s
+      apt:
+        name:
+          - curl
+          - wget
+          - ca-certificates
+          - gnupg
+          - lsb-release
+        state: present
+      tags: k3s
+
+    - name: Baixar e instalar K3s
+      shell: |
+        curl -sfL https://get.k3s.io | INSTALL_K3S_NAME="{{ cluster_name }}" \
+        K3S_TOKEN="{{ k3s_token }}" \
+        K3S_NODE_NAME="{{ k3s_node_name }}" \
+        sh -s - server --cluster-init
+      args:
+        executable: /bin/bash
+        creates: /usr/local/bin/k3s
+      tags: k3s
+
+    - name: Aguardar K3s iniciar
+      wait_for:
+        port: 6443
+        host: localhost
+        delay: 10
+        timeout: 300
+      tags: k3s
+
+    - name: Verificar status do serviço K3s
+      systemd:
+        name: k3s
+        state: started
+        enabled: yes
+      register: k3s_service_status
+      tags: k3s
+
+    - name: Obter informações do cluster
+      shell: |
+        kubectl get nodes
+      register: cluster_nodes
+      changed_when: false
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+      tags: k3s
+
+    - name: Obter token do cluster para novos nodes
+      shell: |
+        cat /var/lib/rancher/k3s/server/node-token
+      register: cluster_token
+      changed_when: false
+      tags: k3s
+
+    - name: Exibir informações do cluster testcluster
+      debug:
+        msg: |
+          Cluster "{{ cluster_name }}" configurado na {{ inventory_hostname }}
+          Status do serviço: {{ k3s_service_status.status.ActiveState }}
+          Nodes do cluster:
+          {{ cluster_nodes.stdout }}
+          Token para novos nodes: {{ cluster_token.stdout }}
+      tags: k3s
+
+    - name: Criar diretório .kube para usuário ansible
+      file:
+        path: /home/ansible/.kube
+        state: directory
+        owner: ansible
+        group: ansible
+        mode: "0755"
+      tags: k3s
+
+    - name: Criar kubeconfig para usuário ansible
+      copy:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: /home/ansible/.kube/config
+        remote_src: yes
+        owner: ansible
+        group: ansible
+        mode: "0600"
+      tags: k3s
+
+    - name: Verificar se kubectl funciona para usuário ansible
+      shell: |
+        kubectl get nodes
+      become_user: ansible
+      register: kubectl_test
+      changed_when: false
+      environment:
+        KUBECONFIG: /home/ansible/.kube/config
+      tags: k3s
+
+    - name: Resultado final
+      debug:
+        msg: |
+          ✅ K3s cluster "{{ cluster_name }}" instalado com sucesso!
+          📍 Node: {{ k3s_node_name }}
+          🌐 API Server: https://{{ ansible_default_ipv4.address }}:6443
+          🔑 Kubectl configurado para usuário ansible
+          📋 Teste kubectl: {{ kubectl_test.stdout }}
+      tags: k3s
