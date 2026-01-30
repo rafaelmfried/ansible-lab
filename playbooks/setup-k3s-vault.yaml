@@ -7,8 +7,16 @@
   vars:
     cluster_name: "testcluster"
     k3s_node_name: "{{ cluster_name }}-master"
+    k3s_snapshotter: "native"
 
   tasks:
+    - name: Detectar systemd
+      stat:
+        path: /run/systemd/system
+      register: systemd_present
+      changed_when: false
+      tags: k3s
+
     - name: Atualizar cache do apt
       become: true
       apt:
@@ -28,16 +36,51 @@
         state: present
       tags: k3s
 
-    - name: Baixar e instalar K3s
+    - name: Baixar e instalar K3s (systemd)
       become: true
       shell: |
         curl -sfL https://get.k3s.io | INSTALL_K3S_NAME="{{ cluster_name }}" \
+        K3S_CONTAINERD_SNAPSHOTTER="{{ k3s_snapshotter }}" \
         K3S_TOKEN="{{ k3s_token }}" \
         K3S_NODE_NAME="{{ k3s_node_name }}" \
         sh -s - server --cluster-init
       args:
         executable: /bin/bash
         creates: /usr/local/bin/k3s
+      when: systemd_present.stat.exists
+      tags: k3s
+
+    - name: Baixar e instalar K3s (sem systemd)
+      become: true
+      shell: |
+        curl -sfL https://get.k3s.io | INSTALL_K3S_NAME="{{ cluster_name }}" \
+        INSTALL_K3S_SKIP_ENABLE=true \
+        INSTALL_K3S_SKIP_START=true \
+        K3S_CONTAINERD_SNAPSHOTTER="{{ k3s_snapshotter }}" \
+        K3S_TOKEN="{{ k3s_token }}" \
+        K3S_NODE_NAME="{{ k3s_node_name }}" \
+        sh -s - server --cluster-init
+      args:
+        executable: /bin/bash
+        creates: /usr/local/bin/k3s
+      when: not systemd_present.stat.exists
+      tags: k3s
+
+    - name: Iniciar K3s em background (sem systemd)
+      become: true
+      shell: |
+        if [ -f /var/run/k3s.pid ] && kill -0 "$(cat /var/run/k3s.pid)" 2>/dev/null; then
+          exit 0
+        fi
+        nohup /usr/local/bin/k3s server --cluster-init > /var/log/k3s.log 2>&1 &
+        echo $! > /var/run/k3s.pid
+      args:
+        executable: /bin/bash
+      environment:
+        K3S_TOKEN: "{{ k3s_token }}"
+        K3S_NODE_NAME: "{{ k3s_node_name }}"
+        K3S_CONTAINERD_SNAPSHOTTER: "{{ k3s_snapshotter }}"
+      when: not systemd_present.stat.exists
       tags: k3s
 
     - name: Aguardar K3s iniciar
@@ -49,6 +92,13 @@
         timeout: 300
       tags: k3s
 
+    - name: Aguardar kubeconfig do K3s
+      become: true
+      wait_for:
+        path: /etc/rancher/k3s/k3s.yaml
+        timeout: 300
+      tags: k3s
+
     - name: Verificar status do serviço K3s
       become: true
       systemd:
@@ -56,16 +106,40 @@
         state: started
         enabled: yes
       register: k3s_service_status
+      when: systemd_present.stat.exists
+      tags: k3s
+
+    - name: Verificar processo do K3s (sem systemd)
+      become: true
+      shell: |
+        if [ -f /var/run/k3s.pid ] && kill -0 "$(cat /var/run/k3s.pid)" 2>/dev/null; then
+          echo "running"
+        else
+          echo "not_running"
+        fi
+      register: k3s_process_status
+      changed_when: false
+      when: not systemd_present.stat.exists
+      tags: k3s
+
+    - name: Definir status do K3s para exibição
+      set_fact:
+        k3s_status_display: "{{ k3s_service_status.status.ActiveState }}"
+      when: systemd_present.stat.exists
+      tags: k3s
+
+    - name: Definir status do K3s para exibição (sem systemd)
+      set_fact:
+        k3s_status_display: "{{ 'running' if k3s_process_status.stdout == 'running' else 'not_running' }}"
+      when: not systemd_present.stat.exists
       tags: k3s
 
     - name: Obter informações do cluster
       become: true
       shell: |
-        kubectl get nodes
+        KUBECONFIG=/etc/rancher/k3s/k3s.yaml /usr/local/bin/kubectl get nodes
       register: cluster_nodes
       changed_when: false
-      environment:
-        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
       tags: k3s
 
     - name: Obter token do cluster para novos nodes
@@ -81,7 +155,7 @@
       debug:
         msg: |
           Cluster "{{ cluster_name }}" configurado na {{ inventory_hostname }}
-          Status do serviço: {{ k3s_service_status.status.ActiveState }}
+          Status do serviço: {{ k3s_status_display }}
           Nodes do cluster:
           {{ cluster_nodes.stdout }}
           Token para novos nodes: {{ cluster_token.stdout }}
@@ -111,11 +185,9 @@
     - name: Verificar se kubectl funciona para usuário ansible
       become: false
       shell: |
-        kubectl get nodes
+        KUBECONFIG=/home/ansible/.kube/config /usr/local/bin/kubectl get nodes
       register: kubectl_test
       changed_when: false
-      environment:
-        KUBECONFIG: /home/ansible/.kube/config
       tags: k3s
 
     - name: Resultado final

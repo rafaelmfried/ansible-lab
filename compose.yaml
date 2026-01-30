@@ -7,6 +7,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.vm
+    privileged: true
     container_name: vm1
     hostname: vm1
     volumes:
@@ -23,6 +24,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.vm
+    privileged: true
     container_name: vm2
     hostname: vm2
     volumes:
@@ -39,6 +41,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.vm
+    privileged: true
     container_name: vm3
     hostname: vm3
     volumes:
@@ -55,6 +58,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.vm
+    privileged: true
     container_name: vm4
     hostname: vm4
     volumes:
@@ -71,6 +75,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.vm
+    privileged: true
     container_name: vm5
     hostname: vm5
     volumes:
@@ -88,6 +93,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.ansible-control
+    privileged: true
     container_name: ansible-control
     hostname: ansible-control
     volumes:
