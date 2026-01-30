@@ -77,7 +77,7 @@ RUN echo "Host *" > /home/ansible/.ssh/config && \
 USER ansible
 
 # Criar estrutura de diretórios do Ansible
-RUN mkdir -p home/ansible/{playbooks,roles,inventory,group_vars,host_vars,collections,plugins}
+RUN for dir in playbooks roles inventory group_vars host_vars collections plugins; do mkdir -p /home/ansible/$dir; done
 
 # Comando padrão
 CMD ["/bin/bash"]
