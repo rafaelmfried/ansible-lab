@@ -14,8 +14,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1
 
 # Atualizar repositórios e instalar dependências do sistema
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+RUN apt update && \
+    apt install -y --no-install-recommends \
         python3 \
         python3-pip \
         python3-venv \
@@ -31,7 +31,7 @@ RUN apt-get update && \
         tree \
         ca-certificates \
         gnupg \
-    && apt-get clean \
+    && apt clean \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /tmp/* \
     && rm -rf /var/tmp/*
@@ -77,7 +77,7 @@ RUN echo "Host *" > /home/ansible/.ssh/config && \
 USER ansible
 
 # Criar estrutura de diretórios do Ansible
-RUN mkdir home/ansible/{playbooks,roles,inventory,group_vars,host_vars,collections,plugins}
+RUN mkdir -p home/ansible/{playbooks,roles,inventory,group_vars,host_vars,collections,plugins}
 
 # Comando padrão
 CMD ["/bin/bash"]

@@ -23,7 +23,7 @@ Este laboratório foca na **prática de Ansible** usando 5 VMs básicas Debian, 
 #### **🖥️ VMs Especializadas (Futuras)**
 
 - **VM1**: Firewall/Gateway (configuração futura)
-- **VM2**: Kubernetes/Container (configuração futura) 
+- **VM2**: Kubernetes/Container (configuração futura)
 - **VM3**: Proxy/Load Balancer (configuração futura)
 - **VM4**: Bastion/VPN (configuração futura)
 - **VM5**: Database/Storage (configuração futura)
@@ -37,7 +37,7 @@ Este laboratório foca na **prática de Ansible** usando 5 VMs básicas Debian, 
 
 #### **🛠️ Stack Base**
 
-- **Sistema**: Debian 12 slim containers
+- **Sistema**: Debian 13 containers
 - **Automação**: Ansible playbooks e roles
 - **Rede**: Docker bridge isolada (198.18.100.0/24)
 - **Gerenciamento**: Docker Compose
@@ -85,14 +85,14 @@ Este laboratório foca na **prática de Ansible** usando 5 VMs básicas Debian, 
 
 ### **VMs Base (Estado Atual)**
 
-| VM | IP | Função Futura | Estado Atual |
-|----|----|-----------|----|
-| **vm1** | 198.18.100.10 | Firewall/Gateway | VM básica Debian |
-| **vm2** | 198.18.100.20 | Kubernetes/Container | VM básica Debian |
-| **vm3** | 198.18.100.30 | Proxy/Load Balancer | VM básica Debian |
-| **vm4** | 198.18.100.40 | Bastion/VPN | VM básica Debian |
-| **vm5** | 198.18.100.50 | Database/Storage | VM básica Debian |
-| **ansible-control** | 198.18.100.100 | Automation Hub | Opcional (comentado) |
+| VM                  | IP             | Função Futura        | Estado Atual         |
+| ------------------- | -------------- | -------------------- | -------------------- |
+| **vm1**             | 198.18.100.10  | Firewall/Gateway     | VM básica Debian     |
+| **vm2**             | 198.18.100.20  | Kubernetes/Container | VM básica Debian     |
+| **vm3**             | 198.18.100.30  | Proxy/Load Balancer  | VM básica Debian     |
+| **vm4**             | 198.18.100.40  | Bastion/VPN          | VM básica Debian     |
+| **vm5**             | 198.18.100.50  | Database/Storage     | VM básica Debian     |
+| **ansible-control** | 198.18.100.100 | Automation Hub       | Opcional (comentado) |
 
 ### **Configuração Atual**
 
@@ -104,10 +104,10 @@ Todas as VMs possuem:
   - Usuário 'ansible' com sudo
   - Python3 para Ansible
   - Ferramentas essenciais
-  
+
 # Pronto para implementar:
 vm1: Firewall UFW/iptables
-vm2: Cluster Kubernetes  
+vm2: Cluster Kubernetes
 vm3: Nginx/HAProxy
 vm4: WireGuard + Bastion
 vm5: PostgreSQL/MySQL
@@ -124,7 +124,7 @@ vm5: PostgreSQL/MySQL
       apt:
         update_cache: yes
         upgrade: dist
-    
+
     - name: Install basic tools
       apt:
         name:
@@ -133,7 +133,7 @@ vm5: PostgreSQL/MySQL
           - wget
           - htop
         state: present
-        
+
     - name: Configure SSH
       service:
         name: ssh
@@ -150,6 +150,7 @@ vm5: PostgreSQL/MySQL
 Cada fase representa um **nível de complexidade crescente**:
 
 #### **🌱 Fase 1** - Setup Básico
+
 ```bash
 # Deploy inicial das VMs
 docker-compose up -d
@@ -160,6 +161,7 @@ docker-compose up -d
 ```
 
 #### **🔥 Fase 2** - Firewall
+
 ```bash
 # Adicionar firewall
 make setup-firewall
@@ -170,6 +172,7 @@ make setup-firewall
 ```
 
 #### **🛠️ Fase 3** - Serviços
+
 ```bash
 # Deploy de serviços
 make deploy-services
@@ -180,6 +183,7 @@ make deploy-services
 ```
 
 #### **🚀 Fase 4** - Produção
+
 ```bash
 # Hardening para produção
 make production-ready
@@ -195,13 +199,13 @@ make production-ready
 
 ### **Por Fase**
 
-| Fase | Competências | Ferramentas | Duração |
-|------|-------------|-------------|----------|
-| 1 - VMs | Ansible basics, SSH, VMs | Docker, Ansible | 3 dias |
-| 2 - Firewall | Network security, UFW | iptables, UFW | 3 dias |
-| 3 - Serviços | Service deployment | nginx, postgresql | 1 semana |
-| 4 - Produção | Security hardening | monitoring, backup | 1 semana |
-| production | Platform Engineer | Monitoring, CI/CD | 1 semana |
+| Fase         | Competências             | Ferramentas        | Duração  |
+| ------------ | ------------------------ | ------------------ | -------- |
+| 1 - VMs      | Ansible basics, SSH, VMs | Docker, Ansible    | 3 dias   |
+| 2 - Firewall | Network security, UFW    | iptables, UFW      | 3 dias   |
+| 3 - Serviços | Service deployment       | nginx, postgresql  | 1 semana |
+| 4 - Produção | Security hardening       | monitoring, backup | 1 semana |
+| production   | Platform Engineer        | Monitoring, CI/CD  | 1 semana |
 
 ### **Skills Roadmap**
 
@@ -216,7 +220,7 @@ graph LR
     G --> H[Database Design]
     H --> I[Monitoring]
     I --> J[CI/CD Pipeline]
-    
+
     style A fill:#e1f5fe
     style E fill:#f3e5f5
     style J fill:#e8f5e8
@@ -269,24 +273,28 @@ docker-compose down
 ## 🎯 Objetivos por Fase
 
 ### **Fase 1: VMs Básicas**
+
 - ✅ 4 VMs Debian funcionando
-- ✅ Rede isolada configurada  
+- ✅ Rede isolada configurada
 - ✅ SSH entre VMs configurado
 - ✅ Ansible básico operacional
 
 ### **Fase 2: Firewall**
+
 - ✅ UFW configurado no gateway
 - ✅ Regras básicas implementadas
 - ✅ Logging de acessos ativo
 - ✅ Controle entre VMs funcionando
 
 ### **Fase 3: Serviços**
+
 - ✅ Web server nginx deployado
 - ✅ PostgreSQL configurado e isolado
 - ✅ Backup automation implementado
 - ✅ Monitoring básico ativo
 
 ### **Fase 4: Produção**
+
 - ✅ Security hardening completo
 - ✅ Performance tuning aplicado
 - ✅ Disaster recovery procedures
@@ -297,23 +305,25 @@ docker-compose down
 ## 📚 Documentação
 
 ### **Próximos Documentos**
+
 1. [`02-setup-inicial.md`](02-setup-inicial.md) → Setup das VMs básicas
 2. [`03-configuracao-firewall.md`](03-configuracao-firewall.md) → Configuração UFW
 3. [`04-redes-isoladas.md`](04-redes-isoladas.md) → Arquitetura de rede
 
 ### **Ferramentas Utilizadas**
 
-| Componente | Tecnologia | Versão | Propósito |
-|------------|------------|--------|-----------|
-| **VMs** | Docker | 20.10+ | Isolamento de ambientes |
-| **OS** | Debian | 12+ | Sistema operacional base |
-| **Automation** | Ansible | 2.15+ | Configuração automatizada |
-| **Firewall** | UFW/iptables | Latest | Controle de acesso |
-| **Monitoring** | rsyslog | Built-in | Logs centralizados |
+| Componente     | Tecnologia   | Versão   | Propósito                 |
+| -------------- | ------------ | -------- | ------------------------- |
+| **VMs**        | Docker       | 20.10+   | Isolamento de ambientes   |
+| **OS**         | Debian       | 12+      | Sistema operacional base  |
+| **Automation** | Ansible      | 2.15+    | Configuração automatizada |
+| **Firewall**   | UFW/iptables | Latest   | Controle de acesso        |
+| **Monitoring** | rsyslog      | Built-in | Logs centralizados        |
 
 ---
 
 **Próximo:** Configure o [setup inicial](02-setup-inicial.md) das VMs!
+
 - 💡 **Features**: Sugerir melhorias
 - 📝 **Docs**: Melhorar documentação
 - 🔧 **Code**: Contribuir com código
