@@ -70,5 +70,13 @@ RUN mkdir -p /home/ansible/{vms,iso,images} && \
 # Expor portas
 EXPOSE 22 5900-5910
 
+# Script de inicialização
+RUN echo '#!/bin/bash' > /start.sh && \
+    echo 'set -e' >> /start.sh && \
+    echo 'mkdir -p /run/sshd /var/run/sshd' >> /start.sh && \
+    echo 'chmod 755 /run/sshd /var/run/sshd' >> /start.sh && \
+    echo 'exec /usr/sbin/sshd -D' >> /start.sh && \
+    chmod +x /start.sh
+
 # Comando de inicialização
-CMD ["/usr/sbin/sshd", "-D"]
+CMD ["/start.sh"]
