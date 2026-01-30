@@ -17,6 +17,23 @@
       changed_when: false
       tags: k3s
 
+    - name: Garantir diretorio de configuracao do K3s
+      become: true
+      file:
+        path: /etc/rancher/k3s
+        state: directory
+        mode: "0755"
+      tags: k3s
+
+    - name: Definir snapshotter do containerd para o K3s
+      become: true
+      copy:
+        dest: /etc/rancher/k3s/config.yaml
+        mode: "0644"
+        content: |
+          snapshotter: "{{ k3s_snapshotter }}"
+      tags: k3s
+
     - name: Atualizar cache do apt
       become: true
       apt:
@@ -40,10 +57,10 @@
       become: true
       shell: |
         curl -sfL https://get.k3s.io | INSTALL_K3S_NAME="{{ cluster_name }}" \
-        K3S_CONTAINERD_SNAPSHOTTER="{{ k3s_snapshotter }}" \
+        INSTALL_K3S_EXEC="server --cluster-init --snapshotter {{ k3s_snapshotter }}" \
         K3S_TOKEN="{{ k3s_token }}" \
         K3S_NODE_NAME="{{ k3s_node_name }}" \
-        sh -s - server --cluster-init
+        sh -s -
       args:
         executable: /bin/bash
         creates: /usr/local/bin/k3s
@@ -56,10 +73,10 @@
         curl -sfL https://get.k3s.io | INSTALL_K3S_NAME="{{ cluster_name }}" \
         INSTALL_K3S_SKIP_ENABLE=true \
         INSTALL_K3S_SKIP_START=true \
-        K3S_CONTAINERD_SNAPSHOTTER="{{ k3s_snapshotter }}" \
+        INSTALL_K3S_EXEC="server --cluster-init --snapshotter {{ k3s_snapshotter }}" \
         K3S_TOKEN="{{ k3s_token }}" \
         K3S_NODE_NAME="{{ k3s_node_name }}" \
-        sh -s - server --cluster-init
+        sh -s -
       args:
         executable: /bin/bash
         creates: /usr/local/bin/k3s
@@ -72,14 +89,13 @@
         if [ -f /var/run/k3s.pid ] && kill -0 "$(cat /var/run/k3s.pid)" 2>/dev/null; then
           exit 0
         fi
-        nohup /usr/local/bin/k3s server --cluster-init > /var/log/k3s.log 2>&1 &
+        nohup /usr/local/bin/k3s server --cluster-init --snapshotter {{ k3s_snapshotter }} > /var/log/k3s.log 2>&1 &
         echo $! > /var/run/k3s.pid
       args:
         executable: /bin/bash
       environment:
         K3S_TOKEN: "{{ k3s_token }}"
         K3S_NODE_NAME: "{{ k3s_node_name }}"
-        K3S_CONTAINERD_SNAPSHOTTER: "{{ k3s_snapshotter }}"
       when: not systemd_present.stat.exists
       tags: k3s
 
