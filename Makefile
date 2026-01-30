@@ -12,7 +12,7 @@ CYAN := \033[0;36m
 NC := \033[0m # No Color
 
 # ===== PHONY TARGETS =====
-.PHONY: help up down build status logs shell setup-ssh setup-vault test-connectivity clean
+.PHONY: lab help up down build status logs shell setup-ssh setup-vault test-connectivity clean
 
 # ===== DEFAULT TARGET =====
 help: ## Show this help message
@@ -24,6 +24,8 @@ help: ## Show this help message
 	@echo ""
 
 # ===== LAB MANAGEMENT =====
+lab: up ## Start the Ansible lab environment (default)
+
 up: ## Start the Ansible lab environment
 	@echo "$(GREEN)🚀 Starting Ansible Lab...$(NC)"
 	@docker compose -f $(DOCKER_COMPOSE) up -d
