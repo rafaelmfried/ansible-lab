@@ -143,6 +143,38 @@ vm5: PostgreSQL/MySQL
 
 ---
 
+## 🧰 Instalação do Ansible (Debian/Ubuntu)
+
+### **Atualize o índice de pacotes do sistema**
+
+```bash
+sudo apt update
+sudo apt upgrade -y
+```
+
+### **Adicione o repositório PPA oficial do Ansible**
+
+```bash
+sudo apt install software-properties-common -y
+sudo apt-add-repository ppa:ansible/ansible
+```
+
+Pressione ENTER quando solicitado a confirmar a adição do repositório.
+
+### **Atualize o índice de pacotes novamente**
+
+```bash
+sudo apt update
+```
+
+### **Instale o pacote ansible**
+
+```bash
+sudo apt install ansible -y
+```
+
+---
+
 ## � Fases de Aprendizado
 
 ### **Estrutura Progressiva**
