@@ -87,21 +87,37 @@ shell: ## 🐚 Enter the Ansible control node shell
 # ===== VAULT OPERATIONS =====
 setup-vault: ## 🔐 Configure SSH keys using Ansible Vault
 	@echo "$(YELLOW)🔐 Configuring SSH keys via Vault...$(NC)"
-	@docker exec ansible-control ansible-playbook playbooks/setup-ssh-vault.yml
+	@docker exec ansible-control bash -c "echo 'ansible-lab-2026' > /home/ansible/.vault_pass && chmod 600 /home/ansible/.vault_pass"
+	@docker exec ansible-control ansible-playbook playbooks/setup-ssh-vault.yml --vault-password-file=/home/ansible/.vault_pass
 	@echo "$(GREEN)✅ Vault SSH keys configured!$(NC)"
 
 edit-vault: ## ✏️ Edit vault file
 	@echo "$(YELLOW)✏️ Editing vault file...$(NC)"
-	@docker exec -it ansible-control ansible-vault edit group_vars/all/vault.yml
+	@docker exec ansible-control bash -c "echo 'ansible-lab-2026' > /home/ansible/.vault_pass && chmod 600 /home/ansible/.vault_pass"
+	@docker exec -it ansible-control ansible-vault edit group_vars/all/vault.yml --vault-password-file=/home/ansible/.vault_pass
 
 view-vault: ## 👁️ View vault contents
 	@echo "$(CYAN)👁️ Vault contents:$(NC)"
-	@docker exec ansible-control ansible-vault view group_vars/all/vault.yml
+	@docker exec ansible-control bash -c "echo 'ansible-lab-2026' > /home/ansible/.vault_pass && chmod 600 /home/ansible/.vault_pass"
+	@docker exec ansible-control ansible-vault view group_vars/all/vault.yml --vault-password-file=/home/ansible/.vault_pass
 
 test-vault: ## 🧪 Test vault variables
 	@echo "$(YELLOW)🧪 Testing vault variables...$(NC)"
 	@docker exec ansible-control ansible all -m debug -a "var=ssh_public_key"
-setup-ssh: setup-vault ## 🔑 Setup SSH keys between control and managed nodes (via Vault)
+
+vault-status: ## 📊 Check vault encryption status
+	@echo "$(CYAN)📊 Checking vault status...$(NC)"
+	@if docker exec ansible-control test -f group_vars/all/vault.yml; then \
+		if docker exec ansible-control head -1 group_vars/all/vault.yml | grep -q '\$$ANSIBLE_VAULT'; then \
+			echo "$(GREEN)✅ Vault is encrypted$(NC)"; \
+		else \
+			echo "$(RED)❌ Vault is not encrypted$(NC)"; \
+		fi; \
+	else \
+		echo "$(RED)❌ Vault file not found$(NC)"; \
+	fi
+
+setup-ssh: ## 🔑 Setup SSH keys between control and managed nodes
 	@echo "$(YELLOW)🔑 Setting up SSH keys...$(NC)"
 	@docker exec ansible-control bash -c " \
 		for host in web-server-1 web-server-2 db-server-1 app-server-1 vm-host; do \

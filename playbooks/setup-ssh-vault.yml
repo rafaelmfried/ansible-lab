@@ -1,10 +1,10 @@
 ---
 # Playbook para configurar SSH keys usando Ansible Vault
 - name: Configurar SSH keys do lab usando Vault
-  hosts: all
+  hosts: all:!ansible-control
   become: yes
   vars_files:
-    - group_vars/all/vault.yml
+    - ../group_vars/all/vault.yml
 
   tasks:
     - name: Configurar chave SSH no usuário ansible
