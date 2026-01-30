@@ -131,16 +131,27 @@
         timeout: 300
       tags: k3s
 
-    - name: Aguardar API do K3s responder
+    - name: Aguardar API do K3s responder (best effort)
       become: true
       shell: |
-        curl -sk https://127.0.0.1:6443/healthz
+        for i in $(seq 1 12); do
+          out="$(curl -sk https://127.0.0.1:6443/healthz | tr -d '\n' || true)"
+          if [ "$out" = "ok" ]; then
+            echo "ok"
+            exit 0
+          fi
+          sleep 10
+        done
+        echo "not_ready"
+        exit 0
       register: k3s_health
       changed_when: false
-      retries: 12
-      delay: 10
-      until: k3s_health.rc == 0 and (k3s_health.stdout | lower | trim) == "ok"
-      failed_when: false
+      tags: k3s
+
+    - name: Aviso se API do K3s ainda nao respondeu
+      debug:
+        msg: "⚠️  API do K3s ainda nao respondeu em /healthz. Continuando o playbook..."
+      when: k3s_health.stdout is defined and k3s_health.stdout | trim != "ok"
       tags: k3s
 
     - name: Verificar status do serviço K3s
