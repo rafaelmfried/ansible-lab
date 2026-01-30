@@ -1,355 +1,307 @@
-# 🚀 Estudos de Ansible - Lab Completo
+# 🔥 Ansible Lab - VMs Básicas
 
-> **Ambiente Docker profissional para aprendizado prático de Ansible**  
-> Baseado em **Debian 13 (Trixie)** com automação completa via Makefile
+**Laboratório de aprendizado com 5 VMs Debian prontas para configuração**
 
-Este repositório contém um laboratório completo e isolado para estudar Ansible, simulando uma infraestrutura real com múltiplos servidores em containers Docker.
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
+[![Ansible](https://img.shields.io/badge/Ansible-EE0000?style=for-the-badge&logo=ansible&logoColor=white)](https://ansible.com)
+[![UFW](https://img.shields.io/badge/UFW-FF6B35?style=for-the-badge&logo=ubuntu&logoColor=white)](https://ubuntu.com)
+[![Debian](https://img.shields.io/badge/Debian-A81D33?style=for-the-badge&logo=debian&logoColor=white)](https://debian.org)
+
+> **Ambiente prático para aprender Ansible com 5 VMs básicas prontas para configuração de serviços**
+
+---
 
 ## 🎯 Objetivo
 
-Fornecer um ambiente seguro, reproduzível e completo para:
+Este laboratório fornece **5 VMs Debian** básicas prontas para configuração, ideal para:
 
-- ✅ **Aprender Ansible** do básico ao avançado
-- ✅ **Praticar playbooks** e roles em ambiente real
-- ✅ **Testar configurações** sem impacto em sistemas reais
-- ✅ **Simular cenários** de infraestrutura complexa
-- ✅ **Desenvolver skills** de automação e DevOps
+- ✅ **Aprender Ansible** com ambiente realista
+- ✅ **Praticar automação** de configuração de serviços
+- ✅ **Configurar infraestrutura** (firewall, kubernetes, proxy, VPN, database)
+- ✅ **Implementar playbooks** especializados
+- ✅ **Testar cenários** em ambiente controlado
 
-## 🏗️ Arquitetura do Lab
+## 🏗️ Arquitetura
 
 ```
-🌐 Rede Isolada: 198.18.100.0/24 (RFC 2544)
-
-📊 Control Node     🌐 Web Servers      🗄️ Database        🚀 App Server     💻 VM Host
-┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ ┌───────────────┐ ┌─────────────────┐
-│ ansible-control │ │ web-server-1    │ │ db-server-1     │ │ app-server-1  │ │ vm-host         │
-│ 198.18.100.10   │ │ 198.18.100.20   │ │ 198.18.100.30   │ │ 198.18.100.40 │ │ 198.18.100.50   │
-│ :2222          │ │ :2220           │ │ :2230           │ │ :2240         │ │ :2250           │
-└─────────────────┘ │ web-server-2    │ └─────────────────┘ └───────────────┘ └─────────────────┘
-                     │ 198.18.100.21   │
-                     │ :2221           │
-                     └─────────────────┘
+                    🌐 HOST MACHINE
+                           │
+               ┌───────────▼───────────┐
+               │    LAB NETWORK       │
+               │   198.18.100.0/24    │
+               └───────────┬───────────┘
+                           │
+        ┌──────┬──────┬────┼────┬──────┐
+        │      │      │    │    │      │
+        ▼      ▼      ▼    ▼    ▼      │
+   ┌─────────────────────────────────┐  │
+   │  VM1     VM2     VM3    VM4    │  │
+   │ .10      .20     .30    .40    │  │
+   │ Basic    Basic   Basic  Basic  │  │
+   │         VM5                    │  │
+   │        .50                     │  │
+   │       Basic                    │  │
+   └─────────────────────────────────┘  │
+                                        │
+              ┌─────────────────────────┘
+              ▼
+   ┌─────────────────────────┐
+   │    ANSIBLE-CONTROL      │
+   │      (OPCIONAL)         │
+   │     198.18.100.100      │
+   │   Gerenciamento Central  │
+   └─────────────────────────┘
 ```
 
-## 🛠️ Tecnologias e Features
+### **🖥️ VMs do Laboratório**
 
-- **🐧 OS**: Debian 13 (Trixie) - Latest stable
-- **🐍 Python**: 3.13 com Ansible latest version
-- **🔧 Automação**: Makefile completo para todas as operações
-- **🌐 Networking**: Rede isolada com IPs fixos
-- **🔑 SSH**: Chaves pré-configuradas e acesso externo
-- **💾 Storage**: Volumes persistentes para dados
-- **🏥 Health**: Health checks e monitoring
-- **🔒 Security**: Usuários não-root e privilege escalation
+| VM                  | IP             | Função Futura       | Estado Atual         |
+| ------------------- | -------------- | ------------------- | -------------------- |
+| **vm1**             | 198.18.100.10  | Firewall/Gateway    | VM básica Debian     |
+| **vm2**             | 198.18.100.20  | Kubernetes Nodes    | VM básica Debian     |
+| **vm3**             | 198.18.100.30  | Proxy/Load Balancer | VM básica Debian     |
+| **vm4**             | 198.18.100.40  | Bastion/VPN         | VM básica Debian     |
+| **vm5**             | 198.18.100.50  | PostgreSQL Database | VM básica Debian     |
+| **ansible-control** | 198.18.100.100 | Automation Hub      | Opcional (comentado) |
+
+### **📋 Configuração Atual**
+
+```bash
+# Todas as VMs são básicas com:
+✅ Debian 12 slim
+✅ SSH server configurado
+✅ Usuário 'ansible' com sudo
+✅ Python3 para Ansible
+✅ Ferramentas essenciais
+
+# Prontas para configuração via Ansible:
+🔄 Firewall UFW/iptables (vm1)
+🔄 Cluster Kubernetes (vm2)
+🔄 Nginx Proxy/Load Balancer (vm3)
+🔄 WireGuard VPN + Bastion (vm4)
+🔄 PostgreSQL Database (vm5)
+```
+
+## 🛠️ Tecnologias
+
+- **🐧 SO Base**: Debian 12 slim em containers Docker
+- **⚙️ Automação**: Ansible para configurar toda infraestrutura
+- **🌐 Network**: Docker bridge com IPs fixos (198.18.100.0/24)
+- **🔑 SSH**: Chaves compartilhadas via volumes
+- **📊 Monitoramento**: Logs centralizados para auditoria
+- **📦 Container**: Docker Compose para gerenciamento
 
 ## 🚀 Quick Start
 
-### 1. **Pré-requisitos**
+### **1. Deploy das VMs Básicas**
 
 ```bash
-# Verificar dependências
-docker --version          # ≥ 20.10
-docker compose version    # ≥ 2.0
-make --version           # GNU Make
+# 1. Clonar repositório
+git clone <repo-url>
+cd ansible
+
+# 2. Iniciar VMs básicas (5 VMs Debian)
+docker-compose up -d
+
+# 3. Verificar status
+docker-compose ps
+
+# 4. Testar conectividade
+for i in {1..5}; do
+  echo "Testing vm$i..."
+  docker exec vm$i hostname
+done
 ```
 
-### 2. **Iniciar o Lab**
+### **2. Usar Ansible (Opcional)**
 
 ```bash
-# Comando único - faz tudo!
-make lab
+# Opção A: Ansible Control centralizado
+# Descomente no compose.yaml e execute:
+# docker-compose up -d ansible-control
+# docker exec -it ansible-control bash
 
-# Ou ver todas as opções
-make help
+# Opção B: Ansible local (recomendado para desenvolvimento)
+# Instalar Ansible localmente e configurar inventory:
+ansible all -i "vm1,vm2,vm3,vm4,vm5," -m ping \
+  --ssh-common-args="-o StrictHostKeyChecking=no" \
+  -u ansible -k
 ```
 
-### 3. **Verificar Status**
+### **3. Comandos Úteis**
 
 ```bash
-make status    # Ver containers rodando
-make info      # Informações completas
+# 📊 Status das VMs
+docker-compose ps
+
+# 🔗 Acessar uma VM específica
+docker exec -it vm1 bash  # ou vm2, vm3, vm4, vm5
+
+# 🧪 Teste conectividade entre VMs
+docker exec vm1 ping -c 2 vm2
+
+# 📋 Listar IPs das VMs
+docker network inspect ansible_lab_network | grep -A 3 -B 1 "vm[1-5]"
+
+# 🛑 Parar ambiente
+docker-compose down
 ```
 
-### 4. **Entrar e Testar**
+## 📚 Próximas Configurações via Ansible
 
-```bash
-# Entrar no control node
-make shell
+### **Roadmap de Configuração**
 
-# Dentro do container
-ansible all -m ping                    # Testar conectividade
-ansible all -m setup                   # Coletar facts
-ansible webservers -m shell -a "uptime" # Executar comandos
-```
-
-## 📚 Conteúdo de Estudo
-
-### 🎓 **Níveis de Aprendizado**
-
-1. **🟢 Básico** - Conectividade e módulos ad-hoc
-2. **🟡 Intermediário** - Playbooks e inventários
-3. **🟠 Avançado** - Roles, templates e handlers
-4. **🔴 Expert** - Vault, testing e CI/CD
-5. **🟣 Master** - Cloud provisioning e scaling
-
-### 📂 **Estrutura do Projeto**
-
-```
-ansible/
-├── 🐳 docker/              # Dockerfiles personalizados
-│   ├── Dockerfile.ansible-control  # Control node
-│   ├── Dockerfile.ansible-node     # Managed nodes
-│   └── Dockerfile.vm              # VM simulation
-├── 📋 inventory/           # Inventários de hosts
-│   └── lab.ini            # Inventário principal
-├── 📜 playbooks/          # Playbooks de exemplo
-│   ├── site.yml           # Playbook principal
-│   ├── webservers.yml     # Configuração web
-│   └── databases.yml      # Configuração DB
-├── 🎭 roles/              # Roles reutilizáveis
-│   ├── common/            # Configurações básicas
-│   ├── nginx/             # Web server
-│   └── mysql/             # Database
-├── 🌍 group_vars/         # Variáveis por grupo
-├── 🏠 host_vars/          # Variáveis por host
-├── 📦 collections/        # Ansible Collections
-├── 🐳 compose.yaml        # Docker Compose config
-├── ⚙️ ansible.cfg         # Configuração Ansible
-├── 🔧 Makefile           # Automação completa
-└── 📖 docs/              # Documentação
-    └── setup_lab.md      # Setup detalhado
-```
-
-## 🔧 Comandos Make Principais
-
-```bash
-# 🏃‍♂️ Operações Básicas
-make lab           # Iniciar lab completo
-make down          # Parar lab
-make restart       # Reiniciar
-make status        # Ver status
-make shell         # Entrar no control node
-
-# 🔨 Build e Deploy
-make build         # Construir todas as images
-make rebuild       # Rebuild completo
-make clean         # Limpeza básica
-make clean-all     # Limpeza completa
-
-# 🔍 Debug e Testes
-make logs          # Ver todos os logs
-make test-connectivity  # Testar Ansible
-make setup-ssh     # Reconfigurar SSH
-
-# ℹ️ Informações
-make info          # Informações do lab
-make version       # Versões das tools
-make help          # Todos os comandos
-```
-
-## 🎯 Exercícios Práticos
-
-### **Exercício 1**: Conectividade Básica
-
-```bash
-make shell
-ansible all -m ping
-ansible all -m setup --limit web-server-1
-```
-
-### **Exercício 2**: Instalação de Pacotes
-
-```bash
-ansible webservers -m apt -a "name=nginx state=present" -b
-ansible webservers -m service -a "name=nginx state=started enabled=yes" -b
-```
-
-### **Exercício 3**: Criação de Playbook
+#### **Fase 1: VM1 - Firewall**
 
 ```yaml
-# playbooks/primeiro-playbook.yml
+# playbook: setup-firewall.yml
+- Configure UFW/iptables
+- Setup as gateway (IP forwarding)
+- Network access control
+- Logging and monitoring
+```
+
+#### **Fase 2: VM2 - Kubernetes**
+
+```yaml
+# playbook: setup-kubernetes.yml
+- Install Docker/containerd
+- Setup Kubernetes cluster (kubeadm)
+- Configure master/worker nodes
+- Deploy basic ingress
+```
+
+#### **Fase 3: VM3 - Proxy**
+
+```yaml
+# playbook: setup-proxy.yml
+- Install Nginx/HAProxy
+- Load balancing configuration
+- SSL termination
+- Health checks
+```
+
+#### **Fase 4: VM4 - Bastion**
+
+```yaml
+# playbook: setup-bastion.yml
+- Install WireGuard VPN
+- SSH jump host setup
+- Access control and audit
+- Connection monitoring
+```
+
+#### **Fase 5: VM5 - Database**
+
+```yaml
+# playbook: setup-database.yml
+- Install PostgreSQL
+- Database security hardening
+- Backup automation
+- Performance tuning
+```
+
+### **Estrutura de Inventário**
+
+```ini
+# inventory/hosts
+[firewall]
+vm1 ansible_host=198.18.100.10
+
+[kubernetes]
+vm2 ansible_host=198.18.100.20
+
+[proxy]
+vm3 ansible_host=198.18.100.30
+
+[bastion]
+vm4 ansible_host=198.18.100.40
+
+[database]
+vm5 ansible_host=198.18.100.50
+
+[all:vars]
+ansible_user=ansible
+ansible_ssh_pass=ansible
+ansible_become=yes
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+```
+
 ---
-- name: Configurar servidores web
-  hosts: webservers
-  become: yes
-  tasks:
-    - name: Instalar Nginx
-      apt:
-        name: nginx
-        state: latest
-        update_cache: yes
 
-    - name: Iniciar serviço
-      systemd:
-        name: nginx
-        state: started
-        enabled: yes
-```
+## 🧪 Validação Básica
 
-### **Exercício 4**: Templates e Variáveis
+### **Testes de Conectividade**
 
 ```bash
-# Criar template Jinja2
-vim roles/nginx/templates/index.html.j2
+# ✅ Ping entre VMs
+for i in {1..5}; do
+  docker exec vm1 ping -c 1 vm$i
+done
 
-# Usar no playbook
-- name: Deploy custom index
-  template:
-    src: index.html.j2
-    dest: /var/www/html/index.html
+# ✅ SSH entre VMs (sem Ansible Control)
+docker exec vm1 ssh ansible@vm2 "hostname"
+
+# ✅ Com Ansible local
+ansible all -i inventory/hosts -m ping
+
+# ✅ Verificar usuários e sudo
+ansible all -i inventory/hosts -m shell -a "whoami && sudo whoami"
 ```
 
-## 🔐 Acesso e Credenciais
+### **Estado Atual**
 
-### **SSH Direto aos Containers**
+- ✅ **5 VMs Debian** rodando e conectadas
+- ✅ **SSH configurado** entre todas VMs
+- ✅ **Network funcionando** (198.18.100.0/24)
+- ✅ **Pronto para configuração** via Ansible
+- ✅ **Ansible Control opcional** (descomentado conforme necessário)
+
+## 📖 Documentação
+
+### **Guias Principais**
+
+- [`docs/01-introducao.md`](docs/01-introducao.md) → **Introdução e objetivos**
+- [`docs/setup_lab.md`](docs/setup_lab.md) → **Setup detalhado**
+- [`firewall/rules.conf`](firewall/rules.conf) → **Regras do firewall**
+
+### **Playbooks Incluídos**
 
 ```bash
-ssh ansible@localhost -p 2222  # Control node
-ssh ansible@localhost -p 2220  # Web server 1
-ssh ansible@localhost -p 2230  # Database server
-ssh ansible@localhost -p 2240  # App server
-ssh ansible@localhost -p 2250  # VM host
+playbooks/
+├── setup-basic.yml      # Configuração inicial das VMs
+├── setup-firewall.yml   # Configuração UFW
+├── webserver.yml        # Deploy nginx
+├── database.yml         # Setup PostgreSQL
+└── monitoring.yml       # Logs e auditoria
 ```
 
-### **Credenciais Padrão**
+## 🔮 Próximos Passos
 
-- **👤 Usuário**: `ansible`
-- **🔑 Password**: `ansible`
-- **🗝️ SSH Key**: `rafael.friederick@gmail.com` (pré-configurada)
-- **🛡️ Sudo**: NOPASSWD habilitado
+Após dominar este lab, você pode expandir para:
 
-## 🌟 Features Avançadas
+- [ ] **Múltiplas redes** isoladas
+- [ ] **Load balancing** com HAProxy
+- [ ] **Container orchestration** com Docker Swarm
+- [ ] **CI/CD pipeline** com GitLab
+- [ ] **Monitoring avançado** com Prometheus
 
-### **🖥️ Virtualização** (vm-host)
-
-- **QEMU/KVM** para criar VMs reais
-- **Cloud-init** para provisionamento
-- **VNC** access via `localhost:5920-5930`
-- **libvirt** para gerenciamento
-
-### **💾 Persistência**
-
-- **SSH Keys**: Compartilhadas entre containers
-- **Database**: Volume persistente MySQL
-- **VM Storage**: Imagens e VMs salvas
-- **Logs**: Centralizados via Docker
-
-### **🔍 Monitoring**
-
-- **Health Checks**: SSH services
-- **Resource Usage**: `make status`
-- **Container Logs**: `make logs`
-- **Network Debug**: Ferramentas incluídas
-
-## 🚨 Troubleshooting
-
-### **Problema**: Conflito de rede
-
-```bash
-docker network prune -f
-make clean && make lab
-```
-
-### **Problema**: SSH não conecta
-
-```bash
-make setup-ssh
-ssh -vvv ansible@localhost -p 2222
-```
-
-### **Problema**: Container não inicia
-
-```bash
-make logs
-docker logs ansible-control
-make rebuild
-```
-
-### **Problema**: Porta em uso
-
-```bash
-lsof -i :2222
-make down
-make clean
-make lab
-```
-
-## 🎓 Recursos de Aprendizado
-
-### **📖 Documentação**
-
-- [Setup Lab Detalhado](docs/setup_lab.md)
-- [Ansible Official Docs](https://docs.ansible.com/)
-- [Best Practices](https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html)
-
-### **🎮 Labs Práticos**
-
-- **Lab 1**: Conectividade e inventários
-- **Lab 2**: Playbooks básicos
-- **Lab 3**: Roles e templates
-- **Lab 4**: Handlers e conditionals
-- **Lab 5**: Ansible Vault
-- **Lab 6**: Testing e CI/CD
-
-### **🏆 Desafios Avançados**
-
-- Deploy aplicação completa (3-tier)
-- Configuração de load balancer
-- Backup e recovery automatizados
-- Monitoring com Prometheus/Grafana
-- CI/CD pipeline completo
+---
 
 ## 🤝 Contribuições
 
-Contribuições são bem-vindas!
-
-1. **Fork** o projeto
-2. **Crie** uma branch: `git checkout -b feature/nova-feature`
-3. **Commit** suas mudanças: `git commit -m 'Add: nova feature'`
-4. **Push** para branch: `git push origin feature/nova-feature`
-5. **Abra** um Pull Request
-
-### **Tipos de Contribuições**
-
-- 🐛 **Bug fixes**
-- ✨ **Novas features**
-- 📚 **Documentação**
-- 🎯 **Exercícios práticos**
-- 🧪 **Novos cenários de teste**
-- 🔧 **Melhorias de performance**
-
-## 📄 Licença
-
-Este projeto está licenciado sob a **MIT License** - veja o arquivo [LICENSE](LICENSE) para detalhes.
-
-## 📞 Suporte
-
-- **📧 Email**: rafael.friederick@gmail.com
-- **🐙 Issues**: Use o sistema de issues do GitHub
-- **💬 Discussões**: Aba Discussions do repositório
-
-## 🙏 Agradecimentos
-
-- **Ansible Community** - Pela excelente ferramenta
-- **Docker** - Pela plataforma de containers
-- **Debian Project** - Pela distribuição estável
-- **Open Source Community** - Por tornar isso possível
+1. Fork o projeto
+2. Crie feature branch (`git checkout -b feature/nova-feature`)
+3. Commit mudanças (`git commit -am 'Add nova feature'`)
+4. Push para branch (`git push origin feature/nova-feature`)
+5. Abra Pull Request
 
 ---
 
-<div align="center">
+## 📄 Licença
 
-**🎉 Happy Learning with Ansible! 🎉**
+MIT License - veja [LICENSE](LICENSE) para detalhes.
 
-_Construído com ❤️ para a comunidade DevOps_
+---
 
-[![Debian](https://img.shields.io/badge/Debian-13%20Trixie-red?style=flat&logo=debian)](https://www.debian.org/)
-[![Docker](https://img.shields.io/badge/Docker-Latest-blue?style=flat&logo=docker)](https://www.docker.com/)
-[![Ansible](https://img.shields.io/badge/Ansible-Latest-black?style=flat&logo=ansible)](https://www.ansible.com/)
-[![Make](https://img.shields.io/badge/Make-GNU-green?style=flat&logo=gnu)](https://www.gnu.org/software/make/)
-
-</div>
-
-- [Ansible Youtube Video - DIOLINUX](https://www.youtube.com/watch?v=y5eKF_XnGyE)
-- [Documentação Oficial do Ansible](https://docs.ansible.com/)
-- [Ansible GitHub Repository](https://github.com/ansible/ansible)
+**🎯 Resultado:** Ambiente completo para dominar Ansible com VMs reais e firewall! 🚀
