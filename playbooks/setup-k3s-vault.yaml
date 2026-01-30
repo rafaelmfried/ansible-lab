@@ -2,7 +2,6 @@
 # Playbook para configurar K3s na VM3 com cluster "testcluster"
 - name: Configurar K3s cluster "testcluster" na VM3
   hosts: vm3
-  become: yes
   vars_files:
     - ../group_vars/all/vault.yml
   vars:
@@ -11,12 +10,14 @@
 
   tasks:
     - name: Atualizar cache do apt
+      become: true
       apt:
         update_cache: yes
         cache_valid_time: 3600
       tags: k3s
 
     - name: Instalar dependências para K3s
+      become: true
       apt:
         name:
           - curl
@@ -28,6 +29,7 @@
       tags: k3s
 
     - name: Baixar e instalar K3s
+      become: true
       shell: |
         curl -sfL https://get.k3s.io | INSTALL_K3S_NAME="{{ cluster_name }}" \
         K3S_TOKEN="{{ k3s_token }}" \
@@ -39,6 +41,7 @@
       tags: k3s
 
     - name: Aguardar K3s iniciar
+      become: false
       wait_for:
         port: 6443
         host: localhost
@@ -47,6 +50,7 @@
       tags: k3s
 
     - name: Verificar status do serviço K3s
+      become: true
       systemd:
         name: k3s
         state: started
@@ -55,6 +59,7 @@
       tags: k3s
 
     - name: Obter informações do cluster
+      become: true
       shell: |
         kubectl get nodes
       register: cluster_nodes
@@ -64,6 +69,7 @@
       tags: k3s
 
     - name: Obter token do cluster para novos nodes
+      become: true
       shell: |
         cat /var/lib/rancher/k3s/server/node-token
       register: cluster_token
@@ -71,6 +77,7 @@
       tags: k3s
 
     - name: Exibir informações do cluster testcluster
+      become: false
       debug:
         msg: |
           Cluster "{{ cluster_name }}" configurado na {{ inventory_hostname }}
@@ -81,6 +88,7 @@
       tags: k3s
 
     - name: Criar diretório .kube para usuário ansible
+      become: true
       file:
         path: /home/ansible/.kube
         state: directory
@@ -90,6 +98,7 @@
       tags: k3s
 
     - name: Criar kubeconfig para usuário ansible
+      become: true
       copy:
         src: /etc/rancher/k3s/k3s.yaml
         dest: /home/ansible/.kube/config
@@ -100,9 +109,9 @@
       tags: k3s
 
     - name: Verificar se kubectl funciona para usuário ansible
+      become: false
       shell: |
         kubectl get nodes
-      become_user: ansible
       register: kubectl_test
       changed_when: false
       environment:
@@ -110,6 +119,7 @@
       tags: k3s
 
     - name: Resultado final
+      become: false
       debug:
         msg: |
           ✅ K3s cluster "{{ cluster_name }}" instalado com sucesso!
