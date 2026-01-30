@@ -99,7 +99,7 @@ Este laboratório foca na **prática de Ansible** usando 5 VMs básicas Debian, 
 ```bash
 # Estado das VMs
 Todas as VMs possuem:
-  - Debian 12 slim
+  - Debian 13
   - SSH server ativo
   - Usuário 'ansible' com sudo
   - Python3 para Ansible
