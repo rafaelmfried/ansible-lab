@@ -1,0 +1,138 @@
+# Ansible Lab Environment - Debian 13
+# rafael.friederick@gmail.com
+
+services:
+  # ===== ANSIBLE CONTROL NODE =====
+  ansible-control:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ansible-control
+    container_name: ansible-control
+    hostname: ansible-control
+    volumes:
+      - ./playbooks:/home/ansible/playbooks:rw
+      - ./roles:/home/ansible/roles:rw
+      - ./inventory:/home/ansible/inventory:rw
+      - ./group_vars:/home/ansible/group_vars:rw
+      - ./host_vars:/home/ansible/host_vars:rw
+      - ./collections:/home/ansible/collections:rw
+      - ./ansible.cfg:/home/ansible/ansible.cfg:ro
+      - ansible_ssh_keys:/home/ansible/.ssh:rw
+    networks:
+      ansible_lab:
+        ipv4_address: 198.18.100.10
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    ports:
+      - 2222:22 # SSH externo para acesso direto
+
+  # ===== WEB SERVERS =====
+  web-server-1:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ansible-node
+    container_name: web-server-1
+    hostname: web-server-1
+    volumes:
+      - ansible_ssh_keys:/home/ansible/.ssh:ro
+    networks:
+      ansible_lab:
+        ipv4_address: 198.18.100.20
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "service", "ssh", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    ports:
+      - 2220:22
+
+  web-server-2:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ansible-node
+    container_name: web-server-2
+    hostname: web-server-2
+    volumes:
+      - ansible_ssh_keys:/home/ansible/.ssh:ro
+    networks:
+      ansible_lab:
+        ipv4_address: 198.18.100.21
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "service", "ssh", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    ports:
+      - 2221:22
+
+  # ===== DATABASE SERVERS =====
+  db-server-1:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ansible-node
+    container_name: db-server-1
+    hostname: db-server-1
+    volumes:
+      - ansible_ssh_keys:/home/ansible/.ssh:ro
+      - db_data_1:/var/lib/mysql
+    networks:
+      ansible_lab:
+        ipv4_address: 198.18.100.30
+    restart: unless-stopped
+    ports:
+      - 2230:22
+
+  # ===== APPLICATION SERVERS =====
+  app-server-1:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ansible-node
+    container_name: app-server-1
+    hostname: app-server-1
+    volumes:
+      - ansible_ssh_keys:/home/ansible/.ssh:ro
+    networks:
+      ansible_lab:
+        ipv4_address: 198.18.100.40
+    restart: unless-stopped
+    ports:
+      - 2240:22
+
+  # ===== VIRTUALIZATION NODE (Opcional) =====
+  vm-host:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.vm
+    container_name: vm-host
+    hostname: vm-host
+    privileged: true
+    volumes:
+      - /dev/kvm:/dev/kvm
+      - vm_storage:/home/ansible/vms
+      - ansible_ssh_keys:/home/ansible/.ssh:ro
+    networks:
+      ansible_lab:
+        ipv4_address: 198.18.100.50
+    restart: unless-stopped
+    ports:
+      - 2250:22
+      - 5920-5930:5900-5910
+
+networks:
+  ansible_lab:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 198.18.100.0/24
+          gateway: 198.18.100.1
+
+volumes:
+  ansible_ssh_keys:
+    driver: local
+  db_data_1:
+    driver: local
+  vm_storage:
+    driver: local
