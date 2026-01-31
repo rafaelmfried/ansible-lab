@@ -4,7 +4,12 @@ wg_interface: "wg0"
 wg_address: "10.8.0.1/24"
 wg_listen_port: 51820
 
-# Exemplo de NAT (se precisar rotear trafego pela bastion)
+# NAT automatico para acesso a rede interna (ajuste a interface)
+wg_enable_nat: true
+wg_nat_interface: "eth0"
+wg_nat_subnet: "10.8.0.0/24"
+
+# Se quiser customizar manualmente, desabilite o NAT acima e defina PostUp/Down:
 # wg_post_up:
 #   - "iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE"
 # wg_post_down:
