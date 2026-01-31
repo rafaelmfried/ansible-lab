@@ -9,6 +9,14 @@
   set_fact:
     postgres_use_systemd: "{{ postgres_systemd.stat.exists | default(false) }}"
 
+- name: Validar credenciais da aplicacao (quando usadas)
+  assert:
+    that:
+      - postgres_app_password is defined
+      - postgres_app_password | length > 0
+    fail_msg: "Defina postgres_app_password no vault (group_vars/database/vault.yml)"
+  when: postgres_app_user is defined
+
 - name: Garantir dependencias para repositorio PGDG
   become: true
   apt:

@@ -4,6 +4,7 @@
   become: true
   vars_files:
     - ../group_vars/database/main.yml
-    - ../group_vars/database/vault.yml
+    - file: ../group_vars/database/vault.yml
+      optional: true
   roles:
     - role: postgres_server
