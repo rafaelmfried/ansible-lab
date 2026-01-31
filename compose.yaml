@@ -8,7 +8,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.vm
     privileged: true
-    cgroupns_mode: host
+    cgroup: host
     stop_signal: SIGRTMIN+3
     container_name: vm1
     hostname: vm1
@@ -31,7 +31,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.vm
     privileged: true
-    cgroupns_mode: host
+    cgroup: host
     stop_signal: SIGRTMIN+3
     container_name: vm2
     hostname: vm2
@@ -54,7 +54,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.vm
     privileged: true
-    cgroupns_mode: host
+    cgroup: host
     stop_signal: SIGRTMIN+3
     container_name: vm3
     hostname: vm3
@@ -77,7 +77,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.vm
     privileged: true
-    cgroupns_mode: host
+    cgroup: host
     stop_signal: SIGRTMIN+3
     container_name: vm4
     hostname: vm4
@@ -100,7 +100,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.vm
     privileged: true
-    cgroupns_mode: host
+    cgroup: host
     stop_signal: SIGRTMIN+3
     container_name: vm5
     hostname: vm5
