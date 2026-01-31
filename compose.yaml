@@ -25,7 +25,7 @@ services:
     tty: true
     restart: unless-stopped
 
-  # ===== VM 02 - KUBERNETES NODES (futuro) =====
+  # ===== VM 02 - PROXY (futuro) =====
   vm2:
     build:
       context: .
@@ -48,7 +48,7 @@ services:
     tty: true
     restart: unless-stopped
 
-  # ===== VM 03 - PROXY (futuro) =====
+  # ===== VM 03 - KUBERNETES NODES (futuro) =====
   vm3:
     build:
       context: .
@@ -58,6 +58,9 @@ services:
     stop_signal: SIGRTMIN+3
     container_name: vm3
     hostname: vm3
+    ports:
+      - 6443:6444 # Kubernetes API Server 6443 -> 6444
+      - 30001:30000 # Kubernetes Dashboard 30000 -> 30001
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
       - ansible_ssh_keys:/home/ansible/.ssh:rw

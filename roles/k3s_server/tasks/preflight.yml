@@ -1,0 +1,15 @@
+---
+- name: Detectar systemd
+  stat:
+    path: /run/systemd/system
+  register: systemd_present
+  changed_when: false
+  tags: k3s
+
+- name: Validar token do K3s
+  assert:
+    that:
+      - k3s_token is defined
+      - k3s_token | length > 0
+    fail_msg: "Defina k3s_token em group_vars/all/vault.yml"
+  tags: k3s

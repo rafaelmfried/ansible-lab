@@ -1,0 +1,35 @@
+---
+- name: Verificar status do servico K3s
+  become: true
+  systemd:
+    name: "{{ k3s_service_name }}"
+    state: started
+    enabled: yes
+  register: k3s_service_status
+  when: systemd_present.stat.exists
+  tags: k3s
+
+- name: Verificar processo do K3s (sem systemd)
+  become: true
+  shell: |
+    if [ -f /var/run/k3s.pid ] && kill -0 "$(cat /var/run/k3s.pid)" 2>/dev/null; then
+      echo "running"
+    else
+      echo "not_running"
+    fi
+  register: k3s_process_status
+  changed_when: false
+  when: not systemd_present.stat.exists
+  tags: k3s
+
+- name: Definir status do K3s para exibicao
+  set_fact:
+    k3s_status_display: "{{ k3s_service_status.status.ActiveState }}"
+  when: systemd_present.stat.exists
+  tags: k3s
+
+- name: Definir status do K3s para exibicao (sem systemd)
+  set_fact:
+    k3s_status_display: "{{ 'running' if k3s_process_status.stdout == 'running' else 'not_running' }}"
+  when: not systemd_present.stat.exists
+  tags: k3s
