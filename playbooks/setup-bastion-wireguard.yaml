@@ -1,0 +1,9 @@
+---
+# Playbook para configurar o bastion com WireGuard
+- name: Configurar bastion com WireGuard
+  hosts: bastion
+  become: true
+  vars_files:
+    - ../group_vars/bastion/vault.yml
+  roles:
+    - role: wireguard_bastion

@@ -1,0 +1,19 @@
+[Interface]
+PrivateKey = {{ wg_private_key }}
+Address = {{ wg_address }}
+ListenPort = {{ wg_listen_port }}
+{% if wg_post_up | length > 0 %}
+PostUp = {{ wg_post_up | join(' ; ') }}
+{% endif %}
+{% if wg_post_down | length > 0 %}
+PostDown = {{ wg_post_down | join(' ; ') }}
+{% endif %}
+
+{% for peer in wg_peers %}
+[Peer]
+PublicKey = {{ peer.public_key }}
+AllowedIPs = {{ peer.allowed_ips }}
+{% if peer.endpoint is defined %}Endpoint = {{ peer.endpoint }}{% endif %}
+{% if peer.persistent_keepalive is defined %}PersistentKeepalive = {{ peer.persistent_keepalive }}{% endif %}
+
+{% endfor %}

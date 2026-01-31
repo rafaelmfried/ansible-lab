@@ -1,0 +1,6 @@
+---
+- name: Reiniciar WireGuard
+  become: true
+  systemd:
+    name: "wg-quick@{{ wg_interface }}"
+    state: restarted

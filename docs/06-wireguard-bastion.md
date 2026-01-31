@@ -1,0 +1,1 @@
+# Configuracao do Bastiao WireGuard

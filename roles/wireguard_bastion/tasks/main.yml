@@ -1,0 +1,64 @@
+---
+- name: Validar chave privada do WireGuard
+  assert:
+    that:
+      - wg_private_key is defined
+      - wg_private_key | length > 0
+    fail_msg: "Defina wg_private_key no vault (group_vars/bastion/vault.yml)"
+  tags: wireguard
+
+- name: Instalar WireGuard
+  become: true
+  apt:
+    name:
+      - wireguard
+      - wireguard-tools
+    state: present
+    update_cache: yes
+  tags: wireguard
+
+- name: Habilitar IP forwarding (IPv4)
+  become: true
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: "1"
+    state: present
+    reload: yes
+  when: wg_ipv4_forward
+  tags: wireguard
+
+- name: Habilitar IP forwarding (IPv6)
+  become: true
+  sysctl:
+    name: net.ipv6.conf.all.forwarding
+    value: "1"
+    state: present
+    reload: yes
+  when: wg_ipv6_forward
+  tags: wireguard
+
+- name: Garantir diretorio de configuracao do WireGuard
+  become: true
+  file:
+    path: /etc/wireguard
+    state: directory
+    mode: "0700"
+  tags: wireguard
+
+- name: Renderizar configuracao do WireGuard
+  become: true
+  template:
+    src: wg.conf.j2
+    dest: "/etc/wireguard/{{ wg_interface }}.conf"
+    mode: "0600"
+  notify: Reiniciar WireGuard
+  no_log: true
+  tags: wireguard
+
+- name: Habilitar e iniciar WireGuard
+  become: true
+  systemd:
+    name: "wg-quick@{{ wg_interface }}"
+    enabled: true
+    state: started
+  tags: wireguard

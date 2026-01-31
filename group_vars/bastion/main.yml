@@ -1,0 +1,13 @@
+---
+# Configuracao publica do WireGuard (bastion)
+wg_interface: "wg0"
+wg_address: "10.8.0.1/24"
+wg_listen_port: 51820
+
+# Exemplo de NAT (se precisar rotear trafego pela bastion)
+# wg_post_up:
+#   - "iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE"
+# wg_post_down:
+#   - "iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE"
+
+wg_peers: []

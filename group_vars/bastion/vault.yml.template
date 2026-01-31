@@ -1,0 +1,8 @@
+# group_vars/bastion/vault.yml
+# Apenas segredos do WireGuard
+#
+# 1) cp group_vars/bastion/vault.yml.template group_vars/bastion/vault.yml
+# 2) edite a chave
+# 3) ansible-vault encrypt group_vars/bastion/vault.yml --vault-password-file .vault_pass
+
+wg_private_key: "COLOQUE_SUA_CHAVE_PRIVADA_AQUI"

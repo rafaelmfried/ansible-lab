@@ -1,22 +1,56 @@
 # roles/
 
-> Funcoes reutilizaveis do Ansible
+> Roles sao unidades reutilizaveis no Ansible. A comunidade recomenda manter cada role pequena, coesa e bem documentada.
 
-## O que e
+## Estrutura recomendada
 
-Roles sao pacotes de tarefas reutilizaveis. Elas organizam arquivos, templates, handlers e variaveis de um componente.
-
-## Estrutura basica
-
-```text
-roles/<nome>/
-  tasks/main.yml
-  handlers/main.yml
-  templates/
-  files/
-  defaults/main.yml
-  vars/main.yml
 ```
+roles/<nome-da-role>/
+  tasks/              # Tarefas da role (main.yml e includes)
+  handlers/           # Handlers (restart, reload, etc)
+  templates/          # Jinja2 templates (arquivos .j2)
+  files/              # Arquivos estaticos para copy
+  defaults/           # Variaveis com menor prioridade
+  vars/               # Variaveis com maior prioridade (use com cuidado)
+  meta/               # Metadados da role (dependencias, galaxy_info)
+  tests/              # Playbooks simples para testar a role
+  README.md           # Documentacao especifica da role
+```
+
+## O que vai em cada pasta
+
+- **tasks/**
+  - `main.yml` e arquivos auxiliares (`install.yml`, `config.yml`, `bootstrap.yml`)
+  - Boas praticas: dividir por etapas e usar `include_tasks`.
+
+- **handlers/**
+  - Acoes acionadas por `notify` (ex.: reiniciar servico)
+
+- **templates/**
+  - Arquivos `.j2` que precisam de variaveis (ex.: configs)
+
+- **files/**
+  - Arquivos estaticos (certificados, scripts, etc.)
+
+- **defaults/**
+  - Valores padrao, sempre sobrescreviveis
+
+- **vars/**
+  - Variaveis com prioridade alta (evite se puder usar defaults)
+
+- **meta/**
+  - `meta/main.yml` com dependencias e informacoes da role
+
+- **tests/**
+  - Playbooks pequenos para validar a role isoladamente
+
+## Boas praticas da comunidade
+
+- Uma role deve fazer **uma coisa bem definida**.
+- Prefira variaveis em `defaults/` e documente no README da role.
+- Evite logar segredos: use `no_log: true` quando necessario.
+- Use `handlers` para restart/reload.
+- Mantenha nomes consistentes (`wireguard_bastion`, `k3s_server`).
 
 ## Como usar em playbooks
 
@@ -27,23 +61,13 @@ roles/<nome>/
     - nome_da_role
 ```
 
-Ou com `include_role`:
+## Uso dinamico
 
 ```yaml
-- name: Usar role de forma dinamica
+- name: Carregar role por tarefa
   hosts: all
   tasks:
     - name: Carregar role
       include_role:
         name: nome_da_role
 ```
-
-## Defaults vs Vars
-
-- `defaults/` tem menor prioridade (bom para valores padrao).
-- `vars/` tem prioridade alta (use com cuidado).
-
-## Dicas
-
-- Uma role deve fazer uma coisa bem definida.
-- Prefira parametros em `defaults` e documente na README da role.
