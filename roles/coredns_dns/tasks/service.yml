@@ -1,0 +1,16 @@
+---
+- name: Recarregar systemd
+  systemd:
+    daemon_reload: true
+
+- name: Garantir etcd ativo
+  service:
+    name: etcd
+    state: started
+    enabled: true
+
+- name: Garantir CoreDNS ativo
+  service:
+    name: coredns
+    state: started
+    enabled: true
