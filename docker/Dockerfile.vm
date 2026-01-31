@@ -81,5 +81,8 @@ EXPOSE 22 5900-5910
 # Sinal correto para systemd
 STOPSIGNAL SIGRTMIN+3
 
+# Healthcheck
+HEALTHCHECK --interval=1m --timeout=10s --start-period=20s CMD curl -f http://localhost:22/ || exit 1
+
 # Comando de inicialização
 CMD ["/sbin/init"]
