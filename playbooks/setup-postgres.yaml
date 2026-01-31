@@ -6,15 +6,23 @@
     - ../group_vars/database/main.yml
   pre_tasks:
     - name: Verificar vault do database (local)
+      delegate_to: localhost
+      run_once: true
       become: false
+      vars:
+        ansible_become: false
       stat:
-        path: ../group_vars/database/vault.yml
+        path: "{{ playbook_dir }}/../group_vars/database/vault.yml"
       register: postgres_vault_stat
 
     - name: Carregar vault do database (local, se existir)
+      delegate_to: localhost
+      run_once: true
       become: false
+      vars:
+        ansible_become: false
       include_vars:
-        file: ../group_vars/database/vault.yml
+        file: "{{ playbook_dir }}/../group_vars/database/vault.yml"
       no_log: true
       when: postgres_vault_stat.stat.exists
   roles:
