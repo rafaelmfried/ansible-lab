@@ -5,10 +5,19 @@
   vars_files:
     - ../group_vars/database/main.yml
   pre_tasks:
-    - name: Carregar vault do database (se existir)
+    - name: Verificar vault do database (local)
+      delegate_to: localhost
+      run_once: true
+      stat:
+        path: ../group_vars/database/vault.yml
+      register: postgres_vault_stat
+
+    - name: Carregar vault do database (local, se existir)
+      delegate_to: localhost
+      run_once: true
       include_vars:
         file: ../group_vars/database/vault.yml
       no_log: true
-      ignore_errors: true
+      when: postgres_vault_stat.stat.exists
   roles:
     - role: postgres_server

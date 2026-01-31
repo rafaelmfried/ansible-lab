@@ -7,6 +7,15 @@
     state: started
   when: postgres_use_systemd | bool
 
+- name: Reiniciar PostgreSQL (systemd) quando config mudar
+  become: true
+  systemd:
+    name: "{{ postgres_service_name }}"
+    state: restarted
+  when:
+    - postgres_use_systemd | bool
+    - postgres_needs_restart | default(false)
+
 - name: Garantir PostgreSQL ativo (sem systemd)
   become: true
   command: "pg_ctlcluster {{ postgres_version }} {{ postgres_cluster }} start"
@@ -14,3 +23,10 @@
   changed_when: pg_ctl_start.rc == 0
   failed_when: pg_ctl_start.rc not in [0,1]
   when: not postgres_use_systemd | bool
+
+- name: Reiniciar PostgreSQL (sem systemd) quando config mudar
+  become: true
+  command: "pg_ctlcluster {{ postgres_version }} {{ postgres_cluster }} restart"
+  when:
+    - not postgres_use_systemd | bool
+    - postgres_needs_restart | default(false)

@@ -12,7 +12,7 @@
     src: postgresql.conf.j2
     dest: "{{ postgres_conf_dir }}/postgresql.conf"
     mode: "0644"
-  notify: Restart PostgreSQL
+  register: postgres_conf_result
 
 - name: Renderizar pg_hba.conf
   become: true
@@ -20,4 +20,8 @@
     src: pg_hba.conf.j2
     dest: "{{ postgres_conf_dir }}/pg_hba.conf"
     mode: "0640"
-  notify: Restart PostgreSQL
+  register: postgres_hba_result
+
+- name: Definir flag de restart do PostgreSQL
+  set_fact:
+    postgres_needs_restart: "{{ (postgres_conf_result.changed | default(false)) or (postgres_hba_result.changed | default(false)) }}"
