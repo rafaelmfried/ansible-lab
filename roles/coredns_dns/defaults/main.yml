@@ -1,0 +1,18 @@
+---
+dns_zone: "lab.unnamed-lab.com"
+dns_listen_ip: "0.0.0.0"
+dns_upstream_servers:
+  - "1.1.1.1"
+  - "8.8.8.8"
+
+dns_coredns_version: "1.11.1"
+dns_etcd_version: "3.5.15"
+
+dns_etcd_name: "dns-etcd"
+dns_etcd_data_dir: "/var/lib/etcd"
+dns_etcd_listen_client_urls: "http://127.0.0.1:2379"
+dns_etcd_advertise_client_urls: "http://127.0.0.1:2379"
+dns_etcd_listen_peer_urls: "http://127.0.0.1:2380"
+dns_etcd_initial_advertise_peer_urls: "http://127.0.0.1:2380"
+
+dns_record_ttl: 60
