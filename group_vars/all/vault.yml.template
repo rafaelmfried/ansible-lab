@@ -1,16 +1,19 @@
-# Template do arquivo vault.yml
-# Copie este arquivo para vault.yml e edite com suas informações
-# Execute: ansible-vault encrypt group_vars/all/vault.yml --vault-password-file=<(echo "sua-senha")
+# group_vars/all/vault.yml
+# Apenas segredos. Variaveis publicas ficam em group_vars/all/main.yml.
+#
+# Como criar/atualizar:
+# 1) cp group_vars/all/vault.yml.template group_vars/all/vault.yml
+# 2) edite os valores
+# 3) ansible-vault encrypt group_vars/all/vault.yml --vault-password-file .vault_pass
 
-$ANSIBLE_VAULT;1.1;AES256
-# Este é um template. Substitua pelos seus dados:
+# Obrigatorio para o role k3s_server
+k3s_token: "COLOQUE_SEU_TOKEN_AQUI"
 
-# vault_ssh_public_key: "sua-chave-ssh-publica"
-# vault_mysql_password: "sua-senha-mysql"
-# vault_app_secret: "seu-app-secret"
-# vault_api_token: "seu-api-token"
-
-# Para criar um novo arquivo vault:
-# 1. cp vault.yml.template vault.yml
-# 2. edite o arquivo com suas informações
-# 3. ansible-vault encrypt vault.yml --vault-password-file=<(echo "sua-senha")
+# Exemplos opcionais (adicione somente o que for usar)
+# lab_admin_password: "senha"
+# db_root_password: "senha"
+# api_token: "token"
+# ssh_private_key: |
+#   -----BEGIN OPENSSH PRIVATE KEY-----
+#   ...
+#   -----END OPENSSH PRIVATE KEY-----
