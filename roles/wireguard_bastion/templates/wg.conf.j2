@@ -2,14 +2,16 @@
 PrivateKey = {{ wg_private_key }}
 Address = {{ wg_address }}
 ListenPort = {{ wg_listen_port }}
-{% if wg_post_up | length > 0 %}
-PostUp = {{ wg_post_up | join(' ; ') }}
+{% set _wg_post_up = wg_post_up | default([]) %}
+{% if _wg_post_up | length > 0 %}
+PostUp = {{ _wg_post_up | join(' ; ') }}
 {% endif %}
-{% if wg_post_down | length > 0 %}
-PostDown = {{ wg_post_down | join(' ; ') }}
+{% set _wg_post_down = wg_post_down | default([]) %}
+{% if _wg_post_down | length > 0 %}
+PostDown = {{ _wg_post_down | join(' ; ') }}
 {% endif %}
 
-{% for peer in wg_peers %}
+{% for peer in (wg_peers | default([])) %}
 [Peer]
 PublicKey = {{ peer.public_key }}
 AllowedIPs = {{ peer.allowed_ips }}
