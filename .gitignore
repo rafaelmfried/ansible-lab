@@ -49,3 +49,6 @@ venv/
 *.backup
 *.bak
 *.old
+
+k3s-vm3.yaml
+docs/dev.md

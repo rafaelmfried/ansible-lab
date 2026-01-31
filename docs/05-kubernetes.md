@@ -48,7 +48,7 @@ kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml get nodes
 1. Abra o tunnel do seu PC para o host (192.168.0.83):
 
 ```bash
-ssh -L 6444:198.18.100.30:6443 rafael@192.168.0.83
+ssh -L 6444:198.18.100.30:6443 rafael@192.168.0.83 -N
 ```
 
 2. Pegue o kubeconfig do vm3 e copie para sua maquina:
