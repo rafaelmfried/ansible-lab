@@ -84,6 +84,8 @@ services:
     stop_signal: SIGRTMIN+3
     container_name: vm4
     hostname: vm4
+    ports:
+      - 51820:51820/udp # WireGuard VPN
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
       - ansible_ssh_keys:/home/ansible/.ssh:rw
