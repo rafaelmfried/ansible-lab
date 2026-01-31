@@ -16,6 +16,6 @@ wg_nat_subnet: "10.8.0.0/24"
 #   - "iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE"
 
 wg_peers:
-  - public_key: "pqzEecOC0JU8PoRxmxJPXO96k+jkmzFnSmFa1i+jIH8="
+  - public_key: "jbUyZbPRNaYsidQC9uDJuLKtQBqasOE7r5vYjS9oahw="
     allowed_ips: "10.8.0.2/32"
     persistent_keepalive: 25
