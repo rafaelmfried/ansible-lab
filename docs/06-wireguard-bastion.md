@@ -50,15 +50,10 @@ wg_interface: "wg0"
 wg_address: "10.8.0.1/24"
 wg_listen_port: 51820
 
-# Se quiser NAT (clientes acessando internet pela bastion)
-wg_post_up:
-  - "iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE"
-  - "iptables -A FORWARD -i wg0 -j ACCEPT"
-  - "iptables -A FORWARD -o wg0 -j ACCEPT"
-wg_post_down:
-  - "iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE"
-  - "iptables -D FORWARD -i wg0 -j ACCEPT"
-  - "iptables -D FORWARD -o wg0 -j ACCEPT"
+# NAT automatico para acesso a rede interna
+wg_enable_nat: true
+wg_nat_interface: "eth0"
+wg_nat_subnet: "10.8.0.0/24"
 
 wg_peers:
   - public_key: "PUBKEY_CLIENTE1"
