@@ -52,3 +52,4 @@ venv/
 
 k3s-vm3.yaml
 docs/dev.md
+examples/clients/*.conf
