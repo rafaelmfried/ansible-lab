@@ -55,6 +55,9 @@ wg_enable_nat: true
 wg_nat_interface: "eth0"
 wg_nat_subnet: "10.8.0.0/24"
 
+# Redes acessiveis via VPN pelos clientes
+wg_client_allowed_ips: "10.8.0.0/24,198.18.100.0/24"
+
 wg_peers:
   - public_key: "PUBKEY_CLIENTE1"
     allowed_ips: "10.8.0.2/32"
@@ -92,7 +95,7 @@ DNS = 1.1.1.1
 [Peer]
 PublicKey = pqzEecOC0JU8PoRxmxJPXO96k+jkmzFnSmFa1i+jIH8=
 Endpoint = SEU_IP_PUBLICO:51820
-AllowedIPs = 10.8.0.0/24
+AllowedIPs = 10.8.0.0/24,198.18.100.0/24
 PersistentKeepalive = 25
 ```
 

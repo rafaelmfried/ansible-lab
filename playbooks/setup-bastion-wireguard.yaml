@@ -4,6 +4,7 @@
   hosts: bastion
   become: true
   vars_files:
+    - ../group_vars/bastion/main.yml
     - ../group_vars/bastion/vault.yml
   roles:
     - role: wireguard_bastion

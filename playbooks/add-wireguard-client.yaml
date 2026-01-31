@@ -3,6 +3,8 @@
   hosts: localhost
   connection: local
   gather_facts: true
+  vars_files:
+    - ../group_vars/bastion/main.yml
   vars_prompt:
     - name: wg_client_name
       prompt: "Nome do cliente (ex: macbook)"
@@ -17,13 +19,16 @@
   vars:
     wg_interface: "wg0"
     wg_client_dns: "1.1.1.1"
-    wg_client_allowed_ips: "10.8.0.0/24"
     wg_client_keepalive: 25
     repo_root: "{{ playbook_dir }}/.."
     wg_clients_dir: "{{ repo_root }}/examples/clients"
     wg_group_vars_file: "{{ repo_root }}/group_vars/bastion/main.yml"
 
   tasks:
+    - name: Definir AllowedIPs do cliente
+      set_fact:
+        wg_client_allowed_ips: "{{ wg_client_allowed_ips | default('10.8.0.0/24,198.18.100.0/24') }}"
+
     - name: Garantir diretorio de clientes
       file:
         path: "{{ wg_clients_dir }}"

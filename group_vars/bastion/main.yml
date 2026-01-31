@@ -9,6 +9,9 @@ wg_enable_nat: true
 wg_nat_interface: "eth0"
 wg_nat_subnet: "10.8.0.0/24"
 
+# Redes acessiveis via VPN pelos clientes
+wg_client_allowed_ips: "10.8.0.0/24,198.18.100.0/24"
+
 # Se quiser customizar manualmente, desabilite o NAT acima e defina PostUp/Down:
 # wg_post_up:
 #   - "iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE"
