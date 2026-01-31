@@ -17,7 +17,7 @@ ansible/
 ├── .vault_pass            # 🔑 Arquivo de senha do Vault
 ├── ansible.cfg            # 📝 Configuração com Vault
 └── playbooks/
-    └── setup-ssh-vault.yml # 🔧 Playbook para SSH via Vault
+    └── setup-ssh.yaml # 🔧 Playbook para SSH via Vault
 ```
 
 ## 🛠️ Instalação e Configuração
@@ -86,29 +86,21 @@ echo \"nova-senha-super-segura\" > .vault_pass
 
 ### **group_vars/all/vault.yml** (Criptografado)
 ```yaml
-# SSH Key do GitHub: rafaelmfried
-ssh_public_key: "ssh-ed25519 AAAAC3... [SUA_CHAVE_AQUI] ...user@example.com"
-
-# Credenciais do Lab
-lab_admin_user: \"ansible\"
-lab_admin_password: \"ansible\"
-
-# Configurações de Rede
-lab_network_subnet: \"198.18.100.0/24\"
-lab_network_gateway: \"198.18.100.1\"
-
-# Metadados do Mantenedor
-maintainer_github: \"rafaelmfried\"
-maintainer_email: \"rafaelmfried@users.noreply.github.com\"
+# Segredos do lab
+k3s_token: "SEU_TOKEN_DO_K3S"
+lab_admin_password: "senha"
+# db_root_password: "senha"
+# api_token: "token"
 ```
 
-### **group_vars/all/main.yml** (Público)
+### **group_vars/all/main.yml** (Publico)
 ```yaml
-# Variáveis não sensíveis
-lab_name: \"ansible-lab\"
-lab_version: \"1.0\"
-control_node_ip: \"198.18.100.10\"
-# ... outras configurações públicas
+# Variaveis nao sensiveis
+ssh_public_key: "ssh-ed25519 AAAAC3..."
+maintainer_github: "rafaelmfried"
+lab_name: "ansible-lab"
+lab_version: "1.0"
+control_node_ip: "198.18.100.10"
 ```
 
 ## 🎯 Casos de Uso no Lab
@@ -119,7 +111,7 @@ control_node_ip: \"198.18.100.10\"
 make shell
 
 # Executar playbook que usa Vault
-ansible-playbook playbooks/setup-ssh-vault.yml
+ansible-playbook playbooks/setup-ssh.yaml
 
 # Verificar se as keys foram configuradas
 ansible all -m ping
@@ -164,10 +156,10 @@ ssl_certificate: |
 ansible-vault view group_vars/all/vault.yml --syntax-check
 
 # Validar variáveis do vault em playbooks
-ansible-playbook --syntax-check playbooks/setup-ssh-vault.yml
+ansible-playbook --syntax-check playbooks/setup-ssh.yaml
 
 # Testar variáveis do vault
-ansible all -m debug -a \"var=ssh_public_key\"
+ansible all -m debug -a \"var=k3s_token\"
 ```
 
 ### **Backup e Segurança**
@@ -333,7 +325,7 @@ ansible-vault encrypt group_vars/all/vault.yml
 #### **3. Variável não encontrada**
 ```bash
 # Verificar se variável existe no vault
-ansible-vault view group_vars/all/vault.yml | grep ssh_public_key
+ansible-vault view group_vars/all/vault.yml | grep k3s_token
 
 # Debug de variáveis
 ansible all -m debug -a \"var=hostvars[inventory_hostname]\"
@@ -352,10 +344,10 @@ chmod 600 .vault_pass
 ansible-inventory --list --yaml
 
 # Testar playbook em modo debug
-ansible-playbook -vvv playbooks/setup-ssh-vault.yml
+ansible-playbook -vvv playbooks/setup-ssh.yaml
 
 # Verificar sintaxe
-ansible-playbook --syntax-check playbooks/setup-ssh-vault.yml
+ansible-playbook --syntax-check playbooks/setup-ssh.yaml
 ```
 
 ## 📚 Comandos de Referência Rápida
