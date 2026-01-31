@@ -1,0 +1,13 @@
+[Unit]
+Description=CoreDNS
+After=network-online.target etcd.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/coredns -conf /etc/coredns/Corefile
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,17 @@
+{{ dns_zone }}:53 {
+  errors
+  log
+  health
+  ready
+  {% if dns_listen_ip is defined %}bind {{ dns_listen_ip }}{% endif %}
+  etcd {
+    path /skydns
+    endpoint {{ dns_etcd_listen_client_urls }}
+  }
+  cache 30
+}
+
+. {
+  forward . {{ dns_upstream_servers | join(' ') }}
+  cache 30
+}

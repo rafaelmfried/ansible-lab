@@ -1,0 +1,23 @@
+[Unit]
+Description=etcd key-value store
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+ExecStart=/usr/local/bin/etcd \
+  --name {{ dns_etcd_name }} \
+  --data-dir {{ dns_etcd_data_dir }} \
+  --listen-client-urls {{ dns_etcd_listen_client_urls }} \
+  --advertise-client-urls {{ dns_etcd_advertise_client_urls }} \
+  --listen-peer-urls {{ dns_etcd_listen_peer_urls }} \
+  --initial-advertise-peer-urls {{ dns_etcd_initial_advertise_peer_urls }} \
+  --initial-cluster {{ dns_etcd_name }}={{ dns_etcd_initial_advertise_peer_urls }} \
+  --initial-cluster-state new \
+  --initial-cluster-token dns-etcd
+Restart=always
+RestartSec=5
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

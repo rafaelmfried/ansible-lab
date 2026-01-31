@@ -1,0 +1,9 @@
+---
+# Playbook para configurar CoreDNS + etcd
+- name: Configurar DNS interno (CoreDNS + etcd)
+  hosts: dns
+  become: true
+  vars_files:
+    - ../group_vars/dns/main.yml
+  roles:
+    - role: coredns_dns
