@@ -1,4 +1,12 @@
 ---
-role_name: postgres_server
-description: Provisiona PostgreSQL via apt (PGDG) na VM de banco de dados
+galaxy_info:
+  role_name: postgres_server
+  author: rafaelmfried
+  description: Provisiona PostgreSQL via apt (PGDG) na VM de banco de dados
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Debian
+      versions:
+        - all
 dependencies: []
