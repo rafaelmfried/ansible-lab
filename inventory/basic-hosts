@@ -16,11 +16,15 @@ vm4 ansible_host=vm4
 [database]
 vm5 ansible_host=vm5
 
+[dns]
+coredns ansible_host=coredns
+
 # Grupos compostos
 [infrastructure:children]
 firewall
 proxy
 bastion
+dns
 
 [application:children]
 k3s
