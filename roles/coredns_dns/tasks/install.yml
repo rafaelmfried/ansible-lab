@@ -1,0 +1,50 @@
+---
+- name: Instalar dependencias
+  apt:
+    name:
+      - curl
+      - ca-certificates
+      - tar
+    state: present
+    update_cache: true
+
+- name: Baixar etcd
+  get_url:
+    url: "https://github.com/etcd-io/etcd/releases/download/v{{ dns_etcd_version }}/etcd-v{{ dns_etcd_version }}-linux-{{ dns_arch }}.tar.gz"
+    dest: "/tmp/etcd-{{ dns_etcd_version }}.tar.gz"
+    mode: "0644"
+
+- name: Descompactar etcd
+  unarchive:
+    src: "/tmp/etcd-{{ dns_etcd_version }}.tar.gz"
+    dest: /tmp
+    remote_src: true
+
+- name: Instalar binarios do etcd
+  copy:
+    src: "/tmp/etcd-v{{ dns_etcd_version }}-linux-{{ dns_arch }}/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    mode: "0755"
+    remote_src: true
+  loop:
+    - etcd
+    - etcdctl
+
+- name: Baixar CoreDNS
+  get_url:
+    url: "https://github.com/coredns/coredns/releases/download/v{{ dns_coredns_version }}/coredns_{{ dns_coredns_version }}_linux_{{ dns_arch }}.tgz"
+    dest: "/tmp/coredns-{{ dns_coredns_version }}.tgz"
+    mode: "0644"
+
+- name: Descompactar CoreDNS
+  unarchive:
+    src: "/tmp/coredns-{{ dns_coredns_version }}.tgz"
+    dest: /tmp
+    remote_src: true
+
+- name: Instalar binario do CoreDNS
+  copy:
+    src: "/tmp/coredns"
+    dest: "/usr/local/bin/coredns"
+    mode: "0755"
+    remote_src: true
