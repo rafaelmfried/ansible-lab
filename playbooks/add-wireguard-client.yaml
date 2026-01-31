@@ -1,0 +1,107 @@
+---
+- name: Criar cliente WireGuard (local)
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars_prompt:
+    - name: wg_client_name
+      prompt: "Nome do cliente (ex: macbook)"
+      private: no
+    - name: wg_client_address
+      prompt: "IP do cliente (ex: 10.8.0.2/32)"
+      private: no
+    - name: wg_endpoint
+      prompt: "Endpoint do servidor (ex: 192.168.0.83:51820)"
+      private: no
+      default: "192.168.0.83:51820"
+  vars:
+    wg_interface: "wg0"
+    wg_client_dns: "1.1.1.1"
+    wg_client_allowed_ips: "10.8.0.0/24"
+    wg_client_keepalive: 25
+    repo_root: "{{ playbook_dir }}/.."
+    wg_clients_dir: "{{ repo_root }}/examples/clients"
+    wg_group_vars_file: "{{ repo_root }}/group_vars/bastion/main.yml"
+
+  tasks:
+    - name: Garantir diretorio de clientes
+      file:
+        path: "{{ wg_clients_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Instalar wireguard-tools (Debian)
+      become: true
+      apt:
+        name: wireguard-tools
+        state: present
+        update_cache: yes
+      when: ansible_os_family == 'Debian'
+
+    - name: Verificar se wg esta disponivel
+      command: wg --version
+      register: wg_check
+      changed_when: false
+      failed_when: wg_check.rc != 0
+
+    - name: Gerar chave privada do cliente
+      command: wg genkey
+      register: wg_client_private_key
+      changed_when: false
+      no_log: true
+
+    - name: Gerar chave publica do cliente
+      command: wg pubkey
+      args:
+        stdin: "{{ wg_client_private_key.stdout }}"
+      register: wg_client_public_key
+      changed_when: false
+      no_log: true
+
+    - name: Obter public key do servidor
+      command: wg show {{ wg_interface }} public-key
+      delegate_to: vm4
+      register: wg_server_public_key
+      changed_when: false
+
+    - name: Criar client.conf
+      copy:
+        dest: "{{ wg_clients_dir }}/{{ wg_client_name }}.conf"
+        mode: "0600"
+        content: |
+          [Interface]
+          PrivateKey = {{ wg_client_private_key.stdout }}
+          Address = {{ wg_client_address }}
+          DNS = {{ wg_client_dns }}
+
+          [Peer]
+          PublicKey = {{ wg_server_public_key.stdout }}
+          Endpoint = {{ wg_endpoint }}
+          AllowedIPs = {{ wg_client_allowed_ips }}
+          PersistentKeepalive = {{ wg_client_keepalive }}
+      no_log: true
+
+    - name: Registrar peer no group_vars/bastion/main.yml
+      blockinfile:
+        path: "{{ wg_group_vars_file }}"
+        marker: "# {mark} ANSIBLE WG PEER {{ wg_client_name }}"
+        insertafter: "^wg_peers:"
+        block: |
+          - public_key: "{{ wg_client_public_key.stdout }}"
+            allowed_ips: "{{ wg_client_address }}"
+            persistent_keepalive: {{ wg_client_keepalive }}
+
+    - name: Exibir resumo
+      debug:
+        msg: |
+          Cliente criado: {{ wg_client_name }}
+          Config: {{ wg_clients_dir }}/{{ wg_client_name }}.conf
+          Public key do cliente: {{ wg_client_public_key.stdout }}
+
+- name: Aplicar configuracao no bastion
+  hosts: bastion
+  become: true
+  vars_files:
+    - ../group_vars/bastion/vault.yml
+  roles:
+    - role: wireguard_bastion

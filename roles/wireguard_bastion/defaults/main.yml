@@ -8,6 +8,11 @@ wg_listen_port: 51820
 wg_post_up: []
 wg_post_down: []
 
+# NAT/forward automatico (para acessar rede interna)
+wg_enable_nat: false
+wg_nat_interface: "eth0"
+wg_nat_subnet: "10.8.0.0/24"
+
 # Lista de peers
 # - public_key: "..."
 #   allowed_ips: "10.8.0.2/32"

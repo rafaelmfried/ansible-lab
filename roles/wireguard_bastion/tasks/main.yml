@@ -13,6 +13,7 @@
     name:
       - wireguard
       - wireguard-tools
+      - iptables
     state: present
     update_cache: yes
   tags: wireguard
@@ -43,6 +44,22 @@
     path: /etc/wireguard
     state: directory
     mode: "0700"
+  tags: wireguard
+
+- name: Definir regras NAT/forward automaticamente
+  set_fact:
+    wg_post_up:
+      - "iptables -t nat -A POSTROUTING -s {{ wg_nat_subnet }} -o {{ wg_nat_interface }} -j MASQUERADE"
+      - "iptables -A FORWARD -i {{ wg_interface }} -o {{ wg_nat_interface }} -j ACCEPT"
+      - "iptables -A FORWARD -i {{ wg_nat_interface }} -o {{ wg_interface }} -m state --state RELATED,ESTABLISHED -j ACCEPT"
+    wg_post_down:
+      - "iptables -t nat -D POSTROUTING -s {{ wg_nat_subnet }} -o {{ wg_nat_interface }} -j MASQUERADE"
+      - "iptables -D FORWARD -i {{ wg_interface }} -o {{ wg_nat_interface }} -j ACCEPT"
+      - "iptables -D FORWARD -i {{ wg_nat_interface }} -o {{ wg_interface }} -m state --state RELATED,ESTABLISHED -j ACCEPT"
+  when:
+    - wg_enable_nat | bool
+    - wg_post_up | length == 0
+    - wg_post_down | length == 0
   tags: wireguard
 
 - name: Renderizar configuracao do WireGuard
