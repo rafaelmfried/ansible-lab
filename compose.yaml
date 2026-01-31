@@ -122,6 +122,29 @@ services:
     tty: true
     restart: unless-stopped
 
+  # ===== COREDNS (shared) =====
+  coredns:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.vm
+    privileged: true
+    cgroup: host
+    stop_signal: SIGRTMIN+3
+    container_name: coredns
+    hostname: coredns
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      - ansible_ssh_keys:/home/ansible/.ssh:rw
+    tmpfs:
+      - /run
+      - /run/lock
+    networks:
+      lab_network:
+        ipv4_address: 198.18.100.60
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
   # ===== ANSIBLE CONTROL (OPCIONAL) =====
   # Descomente para usar Ansible Control centralizado
   ansible-control:
