@@ -1,0 +1,15 @@
+---
+- name: Detectar systemd
+  stat:
+    path: /run/systemd/system
+  register: dns_systemd
+
+- name: Garantir systemd disponivel
+  assert:
+    that:
+      - dns_systemd.stat.exists
+    fail_msg: "Systemd nao encontrado. Este role requer systemd para iniciar CoreDNS/etcd."
+
+- name: Definir arquitetura para download
+  set_fact:
+    dns_arch: "{{ 'amd64' if ansible_architecture in ['x86_64', 'amd64'] else 'arm64' }}"
