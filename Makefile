@@ -68,7 +68,7 @@ shell: ## Enter the Ansible control node shell
 setup-vault: ## Configure SSH keys using Ansible Vault
 	@echo "$(YELLOW)🔐 Configuring SSH keys via Vault...$(NC)"
 	@docker exec $(CONTROL_CONTAINER) bash -c "echo 'ansible-lab-2026' > /home/ansible/.vault_pass && chmod 600 /home/ansible/.vault_pass"
-	@docker exec $(CONTROL_CONTAINER) ansible-playbook -i $(INVENTORY) playbooks/setup-ssh-vault.yaml --vault-password-file=/home/ansible/.vault_pass
+	@docker exec $(CONTROL_CONTAINER) ansible-playbook -i $(INVENTORY) playbooks/setup-ssh.yaml --vault-password-file=/home/ansible/.vault_pass
 	@echo "$(GREEN)✅ Vault SSH keys configured!$(NC)"
 
 # ===== SSH =====
