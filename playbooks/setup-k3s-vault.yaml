@@ -157,7 +157,7 @@
     - name: Verificar status do serviço K3s
       become: true
       systemd:
-        name: k3s
+        name: "k3s-{{ cluster_name }}"
         state: started
         enabled: yes
       register: k3s_service_status
