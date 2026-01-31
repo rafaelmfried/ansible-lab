@@ -8,10 +8,15 @@ services:
       context: .
       dockerfile: docker/Dockerfile.vm
     privileged: true
+    stop_signal: SIGRTMIN+3
     container_name: vm1
     hostname: vm1
     volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
       - ansible_ssh_keys:/home/ansible/.ssh:rw
+    tmpfs:
+      - /run
+      - /run/lock
     networks:
       lab_network:
         ipv4_address: 198.18.100.10
@@ -25,10 +30,15 @@ services:
       context: .
       dockerfile: docker/Dockerfile.vm
     privileged: true
+    stop_signal: SIGRTMIN+3
     container_name: vm2
     hostname: vm2
     volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
       - ansible_ssh_keys:/home/ansible/.ssh:rw
+    tmpfs:
+      - /run
+      - /run/lock
     networks:
       lab_network:
         ipv4_address: 198.18.100.20
@@ -42,6 +52,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.vm
     privileged: true
+    stop_signal: SIGRTMIN+3
     container_name: vm3
     hostname: vm3
     volumes:
@@ -63,10 +74,15 @@ services:
       context: .
       dockerfile: docker/Dockerfile.vm
     privileged: true
+    stop_signal: SIGRTMIN+3
     container_name: vm4
     hostname: vm4
     volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
       - ansible_ssh_keys:/home/ansible/.ssh:rw
+    tmpfs:
+      - /run
+      - /run/lock
     networks:
       lab_network:
         ipv4_address: 198.18.100.40
@@ -80,10 +96,15 @@ services:
       context: .
       dockerfile: docker/Dockerfile.vm
     privileged: true
+    stop_signal: SIGRTMIN+3
     container_name: vm5
     hostname: vm5
     volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
       - ansible_ssh_keys:/home/ansible/.ssh:rw
+    tmpfs:
+      - /run
+      - /run/lock
     networks:
       lab_network:
         ipv4_address: 198.18.100.50

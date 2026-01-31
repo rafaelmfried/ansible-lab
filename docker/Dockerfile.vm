@@ -15,6 +15,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Instalar QEMU/KVM e ferramentas de virtualização
 RUN apt update && \
     apt install -y --no-install-recommends \
+        systemd \
+        systemd-sysv \
         qemu-kvm \
         qemu-utils \
         qemu-system-x86 \
@@ -67,16 +69,17 @@ RUN mkdir -p /home/ansible/.ssh /root/.ssh && \
 RUN mkdir -p /home/ansible/{vms,iso,images} && \
     chown -R ansible:ansible /home/ansible
 
+# Habilitar SSH no systemd
+RUN ln -s /lib/systemd/system/ssh.service /etc/systemd/system/multi-user.target.wants/ssh.service
+
+# Ambiente para systemd em container
+ENV container=docker
+
 # Expor portas
 EXPOSE 22 5900-5910
 
-# Script de inicialização
-RUN echo '#!/bin/bash' > /start.sh && \
-    echo 'set -e' >> /start.sh && \
-    echo 'mkdir -p /run/sshd /var/run/sshd' >> /start.sh && \
-    echo 'chmod 755 /run/sshd /var/run/sshd' >> /start.sh && \
-    echo 'exec /usr/sbin/sshd -D' >> /start.sh && \
-    chmod +x /start.sh
+# Sinal correto para systemd
+STOPSIGNAL SIGRTMIN+3
 
 # Comando de inicialização
-CMD ["/start.sh"]
+CMD ["/sbin/init"]
