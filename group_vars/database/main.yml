@@ -1,0 +1,19 @@
+---
+# Configuracoes publicas do PostgreSQL (database)
+postgres_version: 18
+postgres_cluster: "main"
+postgres_listen_addresses: "*"
+postgres_port: 5432
+
+# Redes permitidas (ajuste conforme o lab)
+postgres_allowed_cidrs:
+  - "198.18.100.0/24"
+
+# Usuario/database da aplicacao (opcional)
+# postgres_app_user: "appuser"
+# postgres_app_db: "appdb"
+
+# NAT/mesh internos (se necessario)
+# postgres_allowed_cidrs:
+#   - "198.18.100.0/24"
+#   - "10.8.0.0/24"

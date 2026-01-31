@@ -1,0 +1,8 @@
+# group_vars/database/vault.yml
+# Apenas segredos do Postgres
+#
+# 1) cp group_vars/database/vault.yml.template group_vars/database/vault.yml
+# 2) edite a chave
+# 3) ansible-vault encrypt group_vars/database/vault.yml --vault-password-file .vault_pass
+
+# postgres_app_password: "COLOQUE_A_SENHA_AQUI"
