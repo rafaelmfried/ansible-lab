@@ -18,7 +18,6 @@
       default: "192.168.0.83:51820"
   vars:
     wg_interface: "wg0"
-    wg_client_dns: "1.1.1.1"
     wg_client_keepalive: 25
     repo_root: "{{ playbook_dir }}/.."
     wg_clients_dir: "{{ repo_root }}/examples/clients"
@@ -28,6 +27,10 @@
     - name: Definir AllowedIPs do cliente
       set_fact:
         wg_client_allowed_ips: "{{ wg_client_allowed_ips | default('10.8.0.0/24,198.18.100.0/24') }}"
+
+    - name: Definir DNS do cliente
+      set_fact:
+        wg_client_dns: "{{ wg_client_dns | default('1.1.1.1') }}"
 
     - name: Garantir diretorio de clientes
       file:
