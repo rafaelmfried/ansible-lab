@@ -33,6 +33,11 @@ postgres_app_db: "appdb"
 ## Se definir usuario defina tambem a senha no vault
 postgres_app_role_attr_flags: "LOGIN"
 
+# Locale/template para criação de DB
+postgres_db_lc_collate: "C.UTF-8"
+postgres_db_lc_ctype: "C.UTF-8"
+# postgres_db_template: "template0"
+
 # PGDG repo (necessario para PG 18)
 postgres_use_pgdg_repo: true
 postgres_pgdg_key_url: "https://www.postgresql.org/media/keys/ACCC4CF8.asc"

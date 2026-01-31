@@ -19,8 +19,9 @@
     name: "{{ postgres_app_db }}"
     owner: "{{ postgres_app_user | default('postgres') }}"
     encoding: "UTF8"
-    lc_collate: "C"
-    lc_ctype: "C"
+    lc_collate: "{{ postgres_db_lc_collate }}"
+    lc_ctype: "{{ postgres_db_lc_ctype }}"
+    template: "{{ postgres_db_template | default(omit) }}"
     login_unix_socket: "{{ postgres_unix_socket_dir }}"
   when: postgres_app_db is defined
 
