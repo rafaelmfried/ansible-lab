@@ -135,7 +135,14 @@
       become: true
       shell: |
         for i in $(seq 1 12); do
-          out="$(curl -sk https://127.0.0.1:6443/healthz | tr -d '\n' || true)"
+          out="$(/usr/local/bin/kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml get --raw='/healthz' 2>/dev/null || true)"
+          out="$(printf '%s' "$out" | tr -d '\n')"
+          if [ "$out" = "ok" ]; then
+            echo "ok"
+            exit 0
+          fi
+          out="$(/usr/local/bin/kubectl --kubeconfig /etc/rancher/k3s/k3s.yaml get --raw='/readyz' 2>/dev/null || true)"
+          out="$(printf '%s' "$out" | tr -d '\n')"
           if [ "$out" = "ok" ]; then
             echo "ok"
             exit 0
