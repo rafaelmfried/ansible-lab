@@ -1,0 +1,7 @@
+---
+galaxy_info:
+  role_name: coredns_dns
+  author: rafael.friederick@gmail.com
+  description: CoreDNS + etcd para DNS interno do lab
+  license: MIT
+  min_ansible_version: "2.14"
