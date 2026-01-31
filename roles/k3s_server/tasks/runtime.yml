@@ -1,0 +1,76 @@
+---
+- name: Parar K3s se estiver rodando (sem systemd)
+  become: true
+  shell: |
+    if [ -x /usr/local/bin/k3s-killall.sh ]; then
+      /usr/local/bin/k3s-killall.sh || true
+    fi
+    pkill -f "/usr/local/bin/k3s server" || true
+    rm -f /var/run/k3s.pid
+  changed_when: false
+  failed_when: false
+  when: not systemd_present.stat.exists
+  tags: k3s
+
+- name: Iniciar K3s em background (sem systemd)
+  become: true
+  shell: |
+    if [ -f /var/run/k3s.pid ] && kill -0 "$(cat /var/run/k3s.pid)" 2>/dev/null; then
+      exit 0
+    fi
+    nohup /usr/local/bin/k3s server --cluster-init --snapshotter {{ k3s_snapshotter }} --config {{ k3s_config_file }} > /var/log/k3s.log 2>&1 &
+    echo $! > /var/run/k3s.pid
+  args:
+    executable: /bin/bash
+  environment:
+    K3S_TOKEN: "{{ k3s_token }}"
+    K3S_NODE_NAME: "{{ k3s_node_name }}"
+    K3S_CONFIG_FILE: "{{ k3s_config_file }}"
+  when: not systemd_present.stat.exists
+  tags: k3s
+
+- name: Aguardar K3s iniciar
+  become: false
+  wait_for:
+    port: "{{ k3s_api_port }}"
+    host: localhost
+    delay: 10
+    timeout: 300
+  tags: k3s
+
+- name: Aguardar kubeconfig do K3s
+  become: true
+  wait_for:
+    path: "{{ k3s_kubeconfig }}"
+    timeout: 300
+  tags: k3s
+
+- name: Aguardar API do K3s responder (best effort)
+  become: true
+  shell: |
+    for i in $(seq 1 {{ k3s_health_retries }}); do
+      out="$(/usr/local/bin/kubectl --kubeconfig {{ k3s_kubeconfig }} get --raw='/healthz' 2>/dev/null || true)"
+      out="$(printf '%s' "$out" | tr -d '\n')"
+      if [ "$out" = "ok" ]; then
+        echo "ok"
+        exit 0
+      fi
+      out="$(/usr/local/bin/kubectl --kubeconfig {{ k3s_kubeconfig }} get --raw='/readyz' 2>/dev/null || true)"
+      out="$(printf '%s' "$out" | tr -d '\n')"
+      if [ "$out" = "ok" ]; then
+        echo "ok"
+        exit 0
+      fi
+      sleep {{ k3s_health_delay }}
+    done
+    echo "not_ready"
+    exit 0
+  register: k3s_health
+  changed_when: false
+  tags: k3s
+
+- name: Aviso se API do K3s ainda nao respondeu
+  debug:
+    msg: "⚠️  API do K3s ainda nao respondeu em /healthz. Continuando o playbook..."
+  when: k3s_health.stdout is defined and k3s_health.stdout | trim != "ok"
+  tags: k3s

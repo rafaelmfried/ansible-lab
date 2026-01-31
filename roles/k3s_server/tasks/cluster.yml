@@ -1,0 +1,51 @@
+---
+- name: Obter informacoes do cluster
+  become: true
+  shell: |
+    KUBECONFIG={{ k3s_kubeconfig }} /usr/local/bin/kubectl get nodes
+  register: cluster_nodes
+  changed_when: false
+  retries: 6
+  delay: 10
+  until: cluster_nodes.rc == 0
+  failed_when: false
+  tags: k3s
+
+- name: Bootstrap do cluster (dashboard + admin)
+  include_tasks: bootstrap.yml
+  when: cluster_nodes.rc == 0
+  tags: k3s
+
+- name: Verificar se token do cluster existe
+  become: true
+  stat:
+    path: /var/lib/rancher/k3s/server/node-token
+  register: k3s_token_file
+  changed_when: false
+  tags: k3s
+
+- name: Obter token do cluster para novos nodes
+  become: true
+  shell: |
+    cat /var/lib/rancher/k3s/server/node-token
+  register: cluster_token
+  changed_when: false
+  when: k3s_token_file.stat.exists
+  failed_when: false
+  tags: k3s
+
+- name: Definir saida do cluster para exibicao
+  set_fact:
+    cluster_nodes_display: "{{ cluster_nodes.stdout if cluster_nodes.rc == 0 else 'API do K3s ainda nao respondeu' }}"
+    cluster_token_display: "{{ cluster_token.stdout if (cluster_token is defined and cluster_token.rc == 0) else 'Token ainda indisponivel' }}"
+  tags: k3s
+
+- name: Exibir informacoes do cluster
+  debug:
+    msg: |
+      Cluster "{{ cluster_name }}" configurado na {{ inventory_hostname }}
+      Status do servico: {{ k3s_status_display }}
+      Nodes do cluster:
+      {{ cluster_nodes_display }}
+      Token para novos nodes: {{ cluster_token_display }}
+  tags: k3s

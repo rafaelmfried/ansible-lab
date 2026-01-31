@@ -1,0 +1,17 @@
+---
+- name: Garantir diretorio de configuracao do K3s
+  become: true
+  file:
+    path: "{{ k3s_config_dir }}"
+    state: directory
+    mode: "0755"
+  tags: k3s
+
+- name: Definir snapshotter do containerd para o K3s
+  become: true
+  copy:
+    dest: "{{ k3s_config_file }}"
+    mode: "0644"
+    content: |
+      snapshotter: "{{ k3s_snapshotter }}"
+  tags: k3s

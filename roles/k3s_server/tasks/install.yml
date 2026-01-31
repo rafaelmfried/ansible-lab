@@ -1,0 +1,51 @@
+---
+- name: Atualizar cache do apt
+  become: true
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  tags: k3s
+
+- name: Instalar dependencias para K3s
+  become: true
+  apt:
+    name:
+      - curl
+      - wget
+      - ca-certificates
+      - gnupg
+      - lsb-release
+    state: present
+  tags: k3s
+
+- name: Baixar e instalar K3s (systemd)
+  become: true
+  shell: |
+    curl -sfL https://get.k3s.io | INSTALL_K3S_NAME="{{ cluster_name }}" \
+    INSTALL_K3S_EXEC="server --cluster-init --snapshotter {{ k3s_snapshotter }}" \
+    K3S_CONFIG_FILE="{{ k3s_config_file }}" \
+    K3S_TOKEN="{{ k3s_token }}" \
+    K3S_NODE_NAME="{{ k3s_node_name }}" \
+    sh -s -
+  args:
+    executable: /bin/bash
+    creates: /usr/local/bin/k3s
+  when: systemd_present.stat.exists
+  tags: k3s
+
+- name: Baixar e instalar K3s (sem systemd)
+  become: true
+  shell: |
+    curl -sfL https://get.k3s.io | INSTALL_K3S_NAME="{{ cluster_name }}" \
+    INSTALL_K3S_SKIP_ENABLE=true \
+    INSTALL_K3S_SKIP_START=true \
+    INSTALL_K3S_EXEC="server --cluster-init --snapshotter {{ k3s_snapshotter }}" \
+    K3S_CONFIG_FILE="{{ k3s_config_file }}" \
+    K3S_TOKEN="{{ k3s_token }}" \
+    K3S_NODE_NAME="{{ k3s_node_name }}" \
+    sh -s -
+  args:
+    executable: /bin/bash
+    creates: /usr/local/bin/k3s
+  when: not systemd_present.stat.exists
+  tags: k3s
