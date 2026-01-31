@@ -133,6 +133,7 @@ services:
       - ./group_vars:/home/ansible/group_vars:rw
       - ./host_vars:/home/ansible/host_vars:rw
       - ./collections:/home/ansible/collections:rw
+      - ./manifests:/home/ansible/manifests:rw
       - ./ansible.cfg:/home/ansible/ansible.cfg:ro
       - ansible_ssh_keys:/home/ansible/.ssh:rw
     networks:
