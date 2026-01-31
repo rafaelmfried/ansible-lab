@@ -8,6 +8,7 @@
     - name: Verificar vault do database (local)
       delegate_to: localhost
       run_once: true
+      become: false
       stat:
         path: ../group_vars/database/vault.yml
       register: postgres_vault_stat
@@ -15,6 +16,7 @@
     - name: Carregar vault do database (local, se existir)
       delegate_to: localhost
       run_once: true
+      become: false
       include_vars:
         file: ../group_vars/database/vault.yml
       no_log: true
