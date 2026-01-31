@@ -11,6 +11,7 @@ wg_nat_subnet: "10.8.0.0/24"
 
 # Redes acessiveis via VPN pelos clientes
 wg_client_allowed_ips: "10.8.0.0/24,198.18.100.0/24"
+wg_client_dns: "198.18.100.60"
 
 # Se quiser customizar manualmente, desabilite o NAT acima e defina PostUp/Down:
 # wg_post_up:

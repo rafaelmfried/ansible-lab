@@ -1,0 +1,25 @@
+---
+# CoreDNS + etcd (shared)
+dns_zone: "lab.unnamed-lab.com"
+dns_listen_ip: "0.0.0.0"
+dns_upstream_servers:
+  - "1.1.1.1"
+  - "8.8.8.8"
+
+# IP do DNS interno (CoreDNS)
+dns_service_ip: "198.18.100.60"
+
+# Registros internos (split-horizon via VPN)
+dns_records:
+  - name: "control.lab.unnamed-lab.com"
+    type: "A"
+    value: "198.18.100.100"
+
+# Wildcards para multi-tenant
+dns_wildcards:
+  - name: "*.lab.apps.unnamed-lab.com"
+    type: "A"
+    value: "198.18.100.20"
+  - name: "*.lab.postgres.unnamed-lab.com"
+    type: "A"
+    value: "198.18.100.50"
