@@ -1,0 +1,12 @@
+---
+- name: Restart PostgreSQL
+  become: true
+  block:
+    - name: Restart via systemd
+      systemd:
+        name: "{{ postgres_service_name }}"
+        state: restarted
+      when: postgres_use_systemd | bool
+    - name: Restart via pg_ctlcluster
+      command: "pg_ctlcluster {{ postgres_version }} {{ postgres_cluster }} restart"
+      when: not postgres_use_systemd | bool

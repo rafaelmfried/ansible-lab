@@ -1,0 +1,38 @@
+---
+- name: Detectar systemd
+  stat:
+    path: /run/systemd/system
+  register: postgres_systemd
+  changed_when: false
+
+- name: Definir uso de systemd
+  set_fact:
+    postgres_use_systemd: "{{ postgres_systemd.stat.exists | default(false) }}"
+
+- name: Garantir dependencias para repositorio PGDG
+  become: true
+  apt:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+    state: present
+    update_cache: yes
+  when: postgres_use_pgdg_repo | bool
+
+- name: Garantir keyring do PGDG
+  become: true
+  get_url:
+    url: "{{ postgres_pgdg_key_url }}"
+    dest: /etc/apt/keyrings/pgdg.gpg
+    mode: "0644"
+  when: postgres_use_pgdg_repo | bool
+
+- name: Adicionar repositorio PGDG
+  become: true
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/pgdg.gpg] {{ postgres_pgdg_repo_base }} {{ postgres_apt_codename }}-pgdg main"
+    filename: pgdg
+    state: present
+  when: postgres_use_pgdg_repo | bool

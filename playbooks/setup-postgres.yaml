@@ -1,0 +1,9 @@
+---
+- name: Provisionar PostgreSQL na VM de banco de dados
+  hosts: database
+  become: true
+  vars_files:
+    - ../group_vars/database/main.yml
+    - ../group_vars/database/vault.yml
+  roles:
+    - role: postgres_server

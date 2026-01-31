@@ -1,0 +1,16 @@
+---
+- name: Garantir PostgreSQL ativo (systemd)
+  become: true
+  systemd:
+    name: "{{ postgres_service_name }}"
+    enabled: true
+    state: started
+  when: postgres_use_systemd | bool
+
+- name: Garantir PostgreSQL ativo (sem systemd)
+  become: true
+  command: "pg_ctlcluster {{ postgres_version }} {{ postgres_cluster }} start"
+  register: pg_ctl_start
+  changed_when: pg_ctl_start.rc == 0
+  failed_when: pg_ctl_start.rc not in [0,1]
+  when: not postgres_use_systemd | bool

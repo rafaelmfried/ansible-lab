@@ -1,0 +1,7 @@
+# Managed by Ansible
+local   all             all                                     {{ postgres_local_auth_method }}
+host    all             all             127.0.0.1/32            {{ postgres_host_auth_method }}
+host    all             all             ::1/128                 {{ postgres_host_auth_method }}
+{% for cidr in postgres_allowed_cidrs %}
+host    all             all             {{ cidr }}              {{ postgres_host_auth_method }}
+{% endfor %}

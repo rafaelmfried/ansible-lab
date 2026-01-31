@@ -1,0 +1,36 @@
+---
+- name: Criar usuario da aplicacao
+  become: true
+  become_user: postgres
+  postgresql_user:
+    name: "{{ postgres_app_user }}"
+    password: "{{ postgres_app_password }}"
+    role_attr_flags: "{{ postgres_app_role_attr_flags }}"
+    login_unix_socket: "{{ postgres_unix_socket_dir }}"
+  no_log: true
+  when:
+    - postgres_app_user is defined
+    - postgres_app_password is defined
+
+- name: Criar database da aplicacao
+  become: true
+  become_user: postgres
+  postgresql_db:
+    name: "{{ postgres_app_db }}"
+    owner: "{{ postgres_app_user | default('postgres') }}"
+    encoding: "UTF8"
+    lc_collate: "C"
+    lc_ctype: "C"
+    login_unix_socket: "{{ postgres_unix_socket_dir }}"
+  when: postgres_app_db is defined
+
+- name: Criar extensoes (opcional)
+  become: true
+  become_user: postgres
+  postgresql_ext:
+    name: "{{ item }}"
+    db: "{{ postgres_app_db | default('postgres') }}"
+    state: present
+    login_unix_socket: "{{ postgres_unix_socket_dir }}"
+  loop: "{{ postgres_extensions }}"
+  when: postgres_extensions | length > 0

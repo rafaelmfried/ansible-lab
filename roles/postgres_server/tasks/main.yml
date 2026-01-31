@@ -1,0 +1,20 @@
+---
+- name: Preflight
+  include_tasks: preflight.yml
+  tags: postgres
+
+- name: Install
+  include_tasks: install.yml
+  tags: postgres
+
+- name: Configure
+  include_tasks: config.yml
+  tags: postgres
+
+- name: Service
+  include_tasks: service.yml
+  tags: postgres
+
+- name: Users and databases
+  include_tasks: users.yml
+  tags: postgres

@@ -1,0 +1,53 @@
+---
+# Versao do PostgreSQL a instalar (via PGDG)
+postgres_version: 18
+postgres_cluster: "main"
+
+# Configuracoes basicas
+postgres_listen_addresses: "*"
+postgres_port: 5432
+
+# Ajustes de performance (simples)
+postgres_max_connections: 100
+postgres_shared_buffers: "256MB"
+postgres_work_mem: "4MB"
+postgres_maintenance_work_mem: "64MB"
+postgres_wal_level: "replica"
+
+# Autenticacao
+postgres_local_auth_method: "peer"
+postgres_host_auth_method: "scram-sha-256"
+postgres_allowed_cidrs:
+  - "127.0.0.1/32"
+  - "::1/128"
+
+# Rede interna do lab (exemplo)
+# - "198.18.100.0/24"
+
+# Extensoes a instalar (opcional)
+postgres_extensions: []
+
+# Usuario/db da aplicacao (opcional)
+# postgres_app_user: "appuser"
+# postgres_app_password: "defina_no_vault"
+# postgres_app_db: "appdb"
+postgres_app_role_attr_flags: "LOGIN"
+
+# PGDG repo (necessario para PG 18)
+postgres_use_pgdg_repo: true
+postgres_pgdg_key_url: "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
+postgres_pgdg_repo_base: "http://apt.postgresql.org/pub/repos/apt"
+postgres_apt_codename: "{{ ansible_distribution_release }}"
+
+# Pacotes
+postgres_packages:
+  - "postgresql-{{ postgres_version }}"
+  - "postgresql-client-{{ postgres_version }}"
+  - "postgresql-contrib-{{ postgres_version }}"
+  - "python3-psycopg2"
+
+# Caminhos
+postgres_conf_dir: "/etc/postgresql/{{ postgres_version }}/{{ postgres_cluster }}"
+postgres_data_dir: "/var/lib/postgresql/{{ postgres_version }}/{{ postgres_cluster }}"
+postgres_service_name: "postgresql"
+postgres_unix_socket_dir: "/var/run/postgresql"

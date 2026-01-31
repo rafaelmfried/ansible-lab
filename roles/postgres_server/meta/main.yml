@@ -1,0 +1,4 @@
+---
+role_name: postgres_server
+description: Provisiona PostgreSQL via apt (PGDG) na VM de banco de dados
+dependencies: []

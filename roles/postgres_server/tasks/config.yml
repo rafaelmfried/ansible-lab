@@ -1,0 +1,23 @@
+---
+- name: Garantir diretorio de configuracao do PostgreSQL
+  become: true
+  file:
+    path: "{{ postgres_conf_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Renderizar postgresql.conf
+  become: true
+  template:
+    src: postgresql.conf.j2
+    dest: "{{ postgres_conf_dir }}/postgresql.conf"
+    mode: "0644"
+  notify: Restart PostgreSQL
+
+- name: Renderizar pg_hba.conf
+  become: true
+  template:
+    src: pg_hba.conf.j2
+    dest: "{{ postgres_conf_dir }}/pg_hba.conf"
+    mode: "0640"
+  notify: Restart PostgreSQL
