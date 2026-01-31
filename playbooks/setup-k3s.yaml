@@ -1,0 +1,8 @@
+---
+# Playbook para configurar K3s usando roles
+- name: Provisionar K3s no grupo k3s
+  hosts: k3s
+  vars_files:
+    - ../group_vars/all/vault.yml
+  roles:
+    - role: k3s_server
