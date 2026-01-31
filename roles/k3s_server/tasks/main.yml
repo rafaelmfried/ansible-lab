@@ -205,6 +205,11 @@
   failed_when: false
   tags: k3s
 
+- name: Bootstrap do cluster (dashboard + admin)
+  include_tasks: bootstrap.yml
+  when: cluster_nodes.rc == 0
+  tags: k3s
+
 - name: Verificar se token do cluster existe
   become: true
   stat:

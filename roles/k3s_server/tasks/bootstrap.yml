@@ -1,0 +1,85 @@
+---
+- name: Criar diretorio temporario de manifests
+  become: true
+  file:
+    path: /tmp/k3s-manifests
+    state: directory
+    mode: "0755"
+  tags: k3s
+
+- name: Criar namespace kubernetes-dashboard se não existir
+  become: true
+  shell: |
+    KUBECONFIG={{ k3s_kubeconfig }} /usr/local/bin/kubectl get ns kubernetes-dashboard || KUBECONFIG={{ k3s_kubeconfig }} /usr/local/bin/kubectl create ns kubernetes-dashboard
+  args:
+    executable: /bin/bash
+  register: dashboard_ns_create
+  changed_when: "'created' in dashboard_ns_create.stdout"
+  tags: k3s
+
+- name: Copiar manifesto admin-user para o node
+  become: true
+  copy:
+    src: "{{ playbook_dir }}/../manifests/admin-user.yaml"
+    dest: /tmp/k3s-manifests/admin-user.yaml
+    mode: "0644"
+  tags: k3s
+
+- name: Verificar namespace kubernetes-dashboard
+  become: true
+  shell: |
+    KUBECONFIG={{ k3s_kubeconfig }} /usr/local/bin/kubectl get ns kubernetes-dashboard
+  args:
+    executable: /bin/bash
+  register: dashboard_ns_check
+  changed_when: false
+  failed_when: false
+  tags: k3s
+
+- name: Criar namespace kubernetes-dashboard se nao existir
+  become: true
+  shell: |
+    KUBECONFIG={{ k3s_kubeconfig }} /usr/local/bin/kubectl create ns kubernetes-dashboard
+  args:
+    executable: /bin/bash
+  register: dashboard_ns_create
+  changed_when: "'created' in dashboard_ns_create.stdout"
+  when: dashboard_ns_check.rc != 0
+  tags: k3s
+
+- name: Instalar Kubernetes Dashboard
+  become: true
+  shell: |
+    KUBECONFIG={{ k3s_kubeconfig }} /usr/local/bin/kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+  args:
+    executable: /bin/bash
+  register: dashboard_apply
+  changed_when: "'created' in dashboard_apply.stdout or 'configured' in dashboard_apply.stdout"
+  retries: 6
+  delay: 10
+  until: dashboard_apply.rc == 0
+  tags: k3s
+
+- name: Aguardar namespace kubernetes-dashboard
+  become: true
+  shell: |
+    KUBECONFIG={{ k3s_kubeconfig }} /usr/local/bin/kubectl get ns kubernetes-dashboard
+  args:
+    executable: /bin/bash
+  register: dashboard_ns
+  retries: 10
+  delay: 6
+  until: dashboard_ns.rc == 0
+  changed_when: false
+  when: dashboard_ns_check.rc == 0 or (dashboard_ns_create is defined and dashboard_ns_create.rc == 0)
+  tags: k3s
+
+- name: Aplicar admin-user do dashboard
+  become: true
+  shell: |
+    KUBECONFIG={{ k3s_kubeconfig }} /usr/local/bin/kubectl apply -f /tmp/k3s-manifests/admin-user.yaml
+  args:
+    executable: /bin/bash
+  register: admin_user_apply
+  changed_when: "'created' in admin_user_apply.stdout or 'configured' in admin_user_apply.stdout"
+  tags: k3s
