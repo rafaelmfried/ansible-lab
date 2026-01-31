@@ -1,0 +1,22 @@
+---
+- name: Unir registros
+  set_fact:
+    dns_all_records: "{{ (dns_records | default([])) + (dns_wildcards | default([])) }}"
+
+- name: Garantir etcd ativo antes de criar registros
+  service:
+    name: etcd
+    state: started
+    enabled: true
+
+- name: Criar registros no etcd
+  command: >
+    /usr/local/bin/etcdctl put {{ dns_record_key }} '{{ dns_record_value }}'
+  environment:
+    ETCDCTL_API: "3"
+    ETCDCTL_ENDPOINTS: "{{ dns_etcd_listen_client_urls }}"
+  vars:
+    dns_record_key: "/skydns/{{ item.name.split('.') | reverse | join('/') }}"
+    dns_record_value: "{{ {'host': item.value, 'ttl': dns_record_ttl | int } | to_json }}"
+  loop: "{{ dns_all_records }}"
+  changed_when: true
