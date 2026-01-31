@@ -1,4 +1,8 @@
 # Managed by Ansible
+data_directory = '{{ postgres_data_dir }}'
+hba_file = '{{ postgres_conf_dir }}/pg_hba.conf'
+ident_file = '{{ postgres_conf_dir }}/pg_ident.conf'
+unix_socket_directories = '{{ postgres_unix_socket_dir }}'
 listen_addresses = '{{ postgres_listen_addresses }}'
 port = {{ postgres_port }}
 max_connections = {{ postgres_max_connections }}

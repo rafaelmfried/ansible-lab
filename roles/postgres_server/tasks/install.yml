@@ -5,3 +5,13 @@
     name: "{{ postgres_packages }}"
     state: present
     update_cache: yes
+
+- name: Verificar data directory do cluster
+  stat:
+    path: "{{ postgres_data_dir }}"
+  register: postgres_data_dir_stat
+
+- name: Criar cluster se data directory nao existir
+  become: true
+  command: "pg_createcluster {{ postgres_version }} {{ postgres_cluster }} --start"
+  when: not postgres_data_dir_stat.stat.exists
