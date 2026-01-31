@@ -1,0 +1,32 @@
+---
+- name: Garantir diretorios
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /etc/coredns
+    - "{{ dns_etcd_data_dir }}"
+
+- name: Renderizar CoreDNS Corefile
+  template:
+    src: Corefile.j2
+    dest: /etc/coredns/Corefile
+    mode: "0644"
+  notify: Restart CoreDNS
+
+- name: Instalar unit do etcd
+  template:
+    src: etcd.service.j2
+    dest: /etc/systemd/system/etcd.service
+    mode: "0644"
+
+- name: Instalar unit do CoreDNS
+  template:
+    src: coredns.service.j2
+    dest: /etc/systemd/system/coredns.service
+    mode: "0644"
+
+- name: Recarregar systemd
+  systemd:
+    daemon_reload: true
